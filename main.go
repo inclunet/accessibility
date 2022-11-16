@@ -10,59 +10,46 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/inclunet/accessibility/pkg/images"
-	"github.com/inclunet/accessibility/pkg/summary"
+	"github.com/inclunet/accessibility/pkg/report"
 )
 
-var AccessibilityChecks []summary.AccessibilityCheck
-var Html string
-
-func AccessibilityCheckResult(s *goquery.Selection, a int, pass bool, description string) {
-	element := goquery.NodeName(s)
-	html, _ := goquery.OuterHtml(s)
-	AccessibilityChecks = append(AccessibilityChecks, summary.AccessibilityCheck{Element: element, A: a, Pass: pass, Description: description, Html: html})
-}
-
-func CheckImageAccessibility(i int, s *goquery.Selection) {
-	a, pass, description := images.Check(s)
-	AccessibilityCheckResult(s, a, pass, description)
-}
-
-func GetPage(url string) (*http.Response, error) {
+func GetPage(url string) (*http.Response, string, error) {
 	Response, err := http.Get(url)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	defer Response.Body.Close()
 
 	if Response.StatusCode != 200 {
-		return nil, errors.New("URL not found")
+		return nil, "", errors.New("URL not found")
 	}
 
 	Body, err := io.ReadAll(Response.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	Html = string(Body)
+	Html := string(Body)
 
 	Response.Body = io.NopCloser(bytes.NewBuffer(Body))
 
-	return Response, nil
+	return Response, Html, nil
 }
 
-func SaveResults() {
-	for _, entry := range summary.Generate(AccessibilityChecks) {
-		log.Printf("%d %s tested with %d errors and %d asserts", entry.Total, entry.Element, entry.Errors, entry.Pass)
-	}
+func CheckImages(document *goquery.Document, Checks *report.AccessibilityReport) {
+	document.Find("img").Each(func(i int, s *goquery.Selection) {
+		a, pass, description := images.Check(s)
+		Checks.AddCheck(s, a, pass, description)
+	})
 }
 
 func EvaluatePage(url string, lang string) {
 	log.Printf("Starting page evaluation process for %s", url)
 
-	Response, err := GetPage(url)
+	Response, _, err := GetPage(url)
 
 	if err != nil {
 		log.Fatal(err)
@@ -78,9 +65,9 @@ func EvaluatePage(url string, lang string) {
 
 	log.Printf("Evaluating page with title: %s", title)
 
-	document.Find("img").Each(CheckImageAccessibility)
-
-	SaveResults()
+	Checks := report.NewAccessibilityReport(url, title, lang)
+	CheckImages(document, &Checks)
+	Checks.Save()
 }
 
 func main() {
