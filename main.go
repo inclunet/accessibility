@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -60,11 +59,7 @@ func SaveResults() {
 	}
 }
 
-func main() {
-	var url string
-	flag.StringVar(&url, "url", "https://inclunet.com.br", "Url to check accessibility")
-	flag.Parse()
-	fmt.Println(url)
+func EvaluatePage(url string, lang string) {
 	log.Printf("Starting page evaluation process for %s", url)
 
 	Response, err := GetPage(url)
@@ -86,4 +81,13 @@ func main() {
 	document.Find("img").Each(CheckImageAccessibility)
 
 	SaveResults()
+}
+
+func main() {
+	var url string
+	var lang string
+	flag.StringVar(&url, "url", "https://inclunet.com.br", "Url to check accessibility")
+	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
+	flag.Parse()
+	EvaluatePage(url, lang)
 }
