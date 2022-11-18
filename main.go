@@ -13,7 +13,7 @@ import (
 	"github.com/inclunet/accessibility/pkg/report"
 )
 
-func GetPage(url string) (*http.Response, string, error) {
+func GetPage(url string) (*goquery.Document, string, error) {
 	Response, err := http.Get(url)
 
 	if err != nil {
@@ -36,7 +36,13 @@ func GetPage(url string) (*http.Response, string, error) {
 
 	Response.Body = io.NopCloser(bytes.NewBuffer(Body))
 
-	return Response, Html, nil
+	Document, err := goquery.NewDocumentFromReader(Response.Body)
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	return Document, Html, nil
 }
 
 func CheckImages(document *goquery.Document, Checks *report.AccessibilityReport) {
@@ -48,25 +54,17 @@ func CheckImages(document *goquery.Document, Checks *report.AccessibilityReport)
 
 func EvaluatePage(url string, lang string) {
 	log.Printf("Starting page evaluation process for %s", url)
-
-	Response, _, err := GetPage(url)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	document, err := goquery.NewDocumentFromReader(Response.Body)
+	Document, _, err := GetPage(url)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	title := document.Find("title").Text()
-
+	title := Document.Find("title").Text()
 	log.Printf("Evaluating page with title: %s", title)
 
 	Checks := report.NewAccessibilityReport(url, title, lang)
-	CheckImages(document, &Checks)
+	CheckImages(Document, &Checks)
 	Checks.Save()
 }
 
