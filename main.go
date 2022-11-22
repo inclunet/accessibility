@@ -13,19 +13,20 @@ import (
 	"github.com/inclunet/accessibility/pkg/report"
 )
 
-func a(s *goquery.Selection, Report *report.AccessibilityReport) {
+func a(s *goquery.Selection, Report *report.AccessibilityReport) (int, bool, string) {
 	fmt.Println(goquery.NodeName(s))
+	return 1, false, ""
 }
 
-func CheckList(f string, s *goquery.Selection, Report *report.AccessibilityReport) {
-	fnList := map[string]func(*goquery.Selection, *report.AccessibilityReport){
+func CheckList(s *goquery.Selection, Report *report.AccessibilityReport) {
+	fnList := map[string]func(*goquery.Selection, *report.AccessibilityReport) (int, bool, string){
 		"img": a,
 	}
-
-	fn, ok := fnList[f]
-
-	if ok {
+	Element := goquery.NodeName(s)
+	if fn, ok := fnList[Element]; ok {
+		//Html, _ := goquery.OuterHtml(s)
 		fn(s, Report)
+		//Report.AddCheck(Element, A, Pass, Description, Html)
 	}
 }
 
@@ -63,9 +64,7 @@ func GetPage(url string) (*goquery.Document, string, error) {
 
 func Check(s *goquery.Selection, Report *report.AccessibilityReport) {
 	s.Each(func(i int, s *goquery.Selection) {
-		CheckList(goquery.NodeName(s), s, Report)
-		//a, pass, description := images.Check(s)
-		//Checks.AddCheck(s, a, pass, description)
+		CheckList(s, Report)
 		Check(s.Children(), Report)
 	})
 }

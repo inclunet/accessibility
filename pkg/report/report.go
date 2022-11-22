@@ -2,8 +2,6 @@ package report
 
 import (
 	"log"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 type AccessibilityCheck struct {
@@ -26,23 +24,25 @@ type AccessibilityReport struct {
 	Checks  []AccessibilityCheck
 }
 
-func (r *AccessibilityReport) AddCheck(s *goquery.Selection, a int, pass bool, description string) {
-	element := goquery.NodeName(s)
-	html, _ := goquery.OuterHtml(s)
-	r.Checks = append(r.Checks, AccessibilityCheck{Element: element, A: a, Pass: pass, Description: description, Html: html})
+func (r *AccessibilityReport) AddCheck(Element string, a int, pass bool, description string, Html string) {
+	r.Checks = append(r.Checks, AccessibilityCheck{Element: Element, A: a, Pass: pass, Description: description, Html: Html})
+	r.UpdateSummary(Element, pass)
+}
+
+func (r *AccessibilityReport) UpdateSummary(Element string, Pass bool) {
+	if _, ok := r.Summary[Element]; !ok {
+		r.Summary[Element] = NewSummary()
+	}
+	if Pass {
+		r.Summary[Element].AddPass()
+	} else {
+		r.Summary[Element].AddError()
+	}
 }
 
 func (r *AccessibilityReport) GenerateSummary() {
 	for _, check := range r.Checks {
-		_, ok := r.Summary[check.Element]
-		if !ok {
-			r.Summary[check.Element] = NewSummary()
-		}
-		if check.Pass {
-			r.Summary[check.Element].AddPass()
-		} else {
-			r.Summary[check.Element].AddError()
-		}
+		r.UpdateSummary(check.Element, check.Pass)
 	}
 }
 
