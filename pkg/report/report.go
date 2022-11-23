@@ -20,7 +20,7 @@ type AccessibilityReport struct {
 	Pass    int
 	Errors  int
 	Total   int
-	Summary map[string]*AccessibilitySummary
+	Summary map[string]AccessibilitySummary
 	Checks  []AccessibilityCheck
 }
 
@@ -30,14 +30,13 @@ func (r *AccessibilityReport) AddCheck(Element string, a int, pass bool, descrip
 }
 
 func (r *AccessibilityReport) UpdateSummary(Element string, Pass bool) {
-	if _, ok := r.Summary[Element]; !ok {
-		r.Summary[Element] = NewSummary()
-	}
-	if Pass {
-		r.Summary[Element].AddPass()
+	Summary, ok := r.Summary[Element]
+	if ok {
+		Summary.Update(Pass)
 	} else {
-		r.Summary[Element].AddError()
+		Summary.Update(Pass)
 	}
+	r.Summary[Element] = Summary
 }
 
 func (r *AccessibilityReport) GenerateSummary() {
@@ -53,5 +52,11 @@ func (r *AccessibilityReport) Save() {
 }
 
 func NewAccessibilityReport(url string, title string, lang string) AccessibilityReport {
-	return AccessibilityReport{URL: url, Title: title, Lang: lang}
+	Report := AccessibilityReport{
+		URL:     url,
+		Title:   title,
+		Lang:    lang,
+		Summary: make(map[string]AccessibilitySummary),
+	}
+	return Report
 }

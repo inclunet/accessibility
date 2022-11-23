@@ -20,6 +20,14 @@ func (s *AccessibilitySummary) AddPass() {
 	s.Count()
 }
 
+func (s *AccessibilitySummary) Update(Pass bool) {
+	if Pass {
+		s.AddPass()
+	} else {
+		s.AddError()
+	}
+}
+
 func NewSummary() *AccessibilitySummary {
 	Summary := new(AccessibilitySummary)
 	return Summary
