@@ -4,14 +4,32 @@ import (
 	"bytes"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/images"
+	"github.com/inclunet/accessibility/pkg/accessibility"
 	"github.com/inclunet/accessibility/pkg/report"
 )
+
+func a(s *goquery.Selection, Report *report.AccessibilityReport) (int, bool, string) {
+	fmt.Println(goquery.NodeName(s))
+	return 1, false, ""
+}
+
+func CheckList(s *goquery.Selection, Report *report.AccessibilityReport) {
+	fnList := map[string]func(*goquery.Selection) (int, bool, string){
+		"img": accessibility.NewImageCheck,
+	}
+	Element := goquery.NodeName(s)
+	if fn, ok := fnList[Element]; ok {
+		Html, _ := goquery.OuterHtml(s)
+		A, Pass, Description := fn(s)
+		Report.AddCheck(Element, A, Pass, Description, Html)
+	}
+}
 
 func GetPage(url string) (*goquery.Document, string, error) {
 	Response, err := http.Get(url)
@@ -45,10 +63,10 @@ func GetPage(url string) (*goquery.Document, string, error) {
 	return Document, Html, nil
 }
 
-func CheckImages(document *goquery.Document, Checks *report.AccessibilityReport) {
-	document.Find("img").Each(func(i int, s *goquery.Selection) {
-		a, pass, description := images.Check(s)
-		Checks.AddCheck(s, a, pass, description)
+func Check(s *goquery.Selection, Report *report.AccessibilityReport) {
+	s.Each(func(i int, s *goquery.Selection) {
+		CheckList(s, Report)
+		Check(s.Children(), Report)
 	})
 }
 
@@ -63,9 +81,9 @@ func EvaluatePage(url string, lang string) {
 	title := Document.Find("title").Text()
 	log.Printf("Evaluating page with title: %s", title)
 
-	Checks := report.NewAccessibilityReport(url, title, lang)
-	CheckImages(Document, &Checks)
-	Checks.Save()
+	Report := report.NewAccessibilityReport(url, title, lang)
+	Check(Document.Find("html"), &Report)
+	Report.Save()
 }
 
 func main() {
