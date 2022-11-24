@@ -1,9 +1,7 @@
 package report
 
 import (
-	"fmt"
 	"html/template"
-	"log"
 	"os"
 )
 
@@ -50,15 +48,24 @@ func (r *AccessibilityReport) GenerateSummary() {
 	}
 }
 
-func (r *AccessibilityReport) Save() {
+func (r *AccessibilityReport) Save(report string) error {
 	Template := template.Must(template.New("model.html").ParseFiles("model.html"))
-	f, _ := os.Create("report.html")
-	defer f.Close()
-	err := Template.Execute(f, r)
-	fmt.Println(err)
-	for Element, Summary := range r.Summary {
-		log.Printf("%d %s tested with %d errors and %d asserts", Summary.Total, Element, Summary.Errors, Summary.Pass)
+
+	File, err := os.Create(report)
+
+	if err != nil {
+		return err
 	}
+
+	defer File.Close()
+
+	err = Template.Execute(File, r)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewAccessibilityReport(url string, title string, lang string) AccessibilityReport {
