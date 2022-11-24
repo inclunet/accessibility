@@ -83,7 +83,15 @@ func EvaluatePage(url string, lang string) {
 
 	Report := report.NewAccessibilityReport(url, title, lang)
 	Check(Document.Find("html"), &Report)
-	Report.Save()
+
+	log.Println("evaluation process is finished. Saving data on final report file...")
+	err = Report.Save()
+
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Evaluation report generated.")
+	}
 }
 
 func main() {
