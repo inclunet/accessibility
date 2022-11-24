@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <title>Accessibility Report</title>
+</head>
+
+<body>
+    <div id="container">
+        <div id="summary">
+            <div id="ReportHeader">
+                <h1>{{.Title}} accessibility evaluate results</h1>
+                <p>The evaluation results for {{.URL}} whas returned {{.Total}} tests and {{.Errors}} and {{.Pass}}</p>
+            </div>
+            <div id="summary">
+                <h2>Accessibility Summary</h2>
+                <table>
+                    <tr>
+                        <th>Element</th>
+                        <th>Total</th>
+                        <th>Errors</th>
+                        <th>Pass</th>
+                    </tr>
+                    {{range $element, $content := .Summary}}
+                    <tr>
+                        <td>{{$element}}</td>
+                        <td>{{$content.Total}}</td>
+                        <td>{{$content.Errors}}</td>
+                        <td>{{$content.Pass}}</td>
+                    </tr>
+                    {{end}}
+                </table>
+            </div>
+            <div id="details">
+                {{range $i, $check := .Checks}}
+                {{if $check.Pass}}
+
+                {{else}}
+                <p>{{$check.Description}} {{$check.Html}}</p>
+                {{end}}
+                {{end}}
+            </div>
+        </div>
+</body>
+
+</html>
