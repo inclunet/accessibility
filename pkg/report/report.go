@@ -48,10 +48,10 @@ func (r *AccessibilityReport) GenerateSummary() {
 	}
 }
 
-func (r *AccessibilityReport) Save() error {
+func (r *AccessibilityReport) Save(report string) error {
 	Template := template.Must(template.New("model.html").ParseFiles("model.html"))
 
-	File, err := os.Create("report.html")
+	File, err := os.Create(report)
 
 	if err != nil {
 		return err

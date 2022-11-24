@@ -70,7 +70,7 @@ func Check(s *goquery.Selection, Report *report.AccessibilityReport) {
 	})
 }
 
-func EvaluatePage(url string, lang string) {
+func EvaluatePage(url string, reportFilename string, lang string) {
 	log.Printf("Starting page evaluation process for %s", url)
 	Document, _, err := GetPage(url)
 
@@ -85,20 +85,22 @@ func EvaluatePage(url string, lang string) {
 	Check(Document.Find("html"), &Report)
 
 	log.Println("evaluation process is finished. Saving data on final report file...")
-	err = Report.Save()
+	err = Report.Save(reportFilename)
 
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println("Evaluation report generated.")
+		log.Printf("Evaluation report generated on %s file.", reportFilename)
 	}
 }
 
 func main() {
 	var url string
+	var report string
 	var lang string
 	flag.StringVar(&url, "url", "https://inclunet.com.br", "Url to check accessibility")
+	flag.StringVar(&report, "report", "report.html", "Output filename to generate final html report")
 	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
 	flag.Parse()
-	EvaluatePage(url, lang)
+	EvaluatePage(url, report, lang)
 }
