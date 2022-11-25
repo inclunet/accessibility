@@ -4,25 +4,16 @@ import (
 	"bytes"
 	"errors"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/accessibility"
 	"github.com/inclunet/accessibility/pkg/report"
 )
 
-func a(s *goquery.Selection, Report *report.AccessibilityReport) (int, bool, string) {
-	fmt.Println(goquery.NodeName(s))
-	return 1, false, ""
-}
-
 func CheckList(s *goquery.Selection, Report *report.AccessibilityReport) {
-	fnList := map[string]func(*goquery.Selection) (int, bool, string){
-		"img": accessibility.NewImageCheck,
-	}
+
 	Element := goquery.NodeName(s)
 	if fn, ok := fnList[Element]; ok {
 		Html, _ := goquery.OuterHtml(s)

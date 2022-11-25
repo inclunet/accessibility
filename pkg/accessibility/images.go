@@ -8,22 +8,9 @@ type Images struct {
 	Element
 }
 
-func (i *Images) AlternativeDescription() (string, bool) {
-	if value, ok := i.Selection.Attr("alt"); ok {
-		if value != "" {
-			return value, true
-		}
-	}
-	return "", false
-}
-
 func (i *Images) isValidAlternativeDescription() bool {
-	alt, ok := i.AlternativeDescription()
-
-	if ok {
-		if len(alt) >= 3 {
-			return true
-		}
+	if accessibleText, ok := i.AccessibleText(); ok && len(accessibleText) >= 3 {
+		return true
 	}
 	return false
 }
