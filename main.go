@@ -9,18 +9,9 @@ import (
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/inclunet/accessibility/pkg/accessibility"
 	"github.com/inclunet/accessibility/pkg/report"
 )
-
-func CheckList(s *goquery.Selection, Report *report.AccessibilityReport) {
-
-	Element := goquery.NodeName(s)
-	if fn, ok := fnList[Element]; ok {
-		Html, _ := goquery.OuterHtml(s)
-		A, Pass, Description := fn(s)
-		Report.AddCheck(Element, A, Pass, Description, Html)
-	}
-}
 
 func GetPage(url string) (*goquery.Document, string, error) {
 	Response, err := http.Get(url)
@@ -56,7 +47,12 @@ func GetPage(url string) (*goquery.Document, string, error) {
 
 func Check(s *goquery.Selection, Report *report.AccessibilityReport) {
 	s.Each(func(i int, s *goquery.Selection) {
-		CheckList(s, Report)
+		elementName := goquery.NodeName(s)
+		Html, _ := goquery.OuterHtml(s)
+		A, Pass, Description, err := accessibility.NewCheck(s)
+		if err == nil {
+			Report.AddCheck(elementName, A, Pass, Description, Html)
+		}
 		Check(s.Children(), Report)
 	})
 }

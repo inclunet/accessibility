@@ -57,13 +57,11 @@ func (e *Element) AccessibleText() (string, bool) {
 	return "", false
 }
 
-func (e *Element) Role() bool {
-	if value, ok := e.Selection.Attr("role"); ok {
-		if value == "true" {
-			return true
-		}
+func (e *Element) Role() (string, bool) {
+	if role, ok := e.Selection.Attr("role"); ok && role != "" {
+		return role, ok
 	}
-	return false
+	return "", false
 }
 
 func (e *Element) Title() (string, bool) {

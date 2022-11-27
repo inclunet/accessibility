@@ -1,8 +1,6 @@
 package accessibility
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
+import "github.com/PuerkitoBio/goquery"
 
 type Links struct {
 	Element
@@ -18,9 +16,8 @@ func (l *Links) Check() (int, bool, string) {
 	return 1, true, "Hidden Links do not need text description."
 }
 
-func NewLinkCheck(s *goquery.Selection) (int, bool, string) {
-	link := new(Links)
-	link.Selection = s
-	A, Pass, Description := link.Check()
-	return A, Pass, Description
+func NewLinkCheck(s *goquery.Selection) Accessibility {
+	accessibilityInterface := new(Links)
+	accessibilityInterface.Selection = s
+	return accessibilityInterface
 }

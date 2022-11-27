@@ -1,15 +1,21 @@
 package accessibility
 
-import "github.com/PuerkitoBio/goquery"
+import (
+	"errors"
 
-func NewCheck(s *goquery.Selection) (int, bool, string) {
-	accessibilityCheckList := map[string]Accessibility{
-		"a":   Links,
-		"img": Images,
+	"github.com/PuerkitoBio/goquery"
+)
+
+func NewCheck(s *goquery.Selection) (int, bool, string, error) {
+	accessibilityCheckList := map[string]func(*goquery.Selection) Accessibility{
+		"a":   NewLinkCheck,
+		"img": NewImageCheck,
 	}
 	elementName := goquery.NodeName(s)
 	if elementInterface, ok := accessibilityCheckList[elementName]; ok {
-		a := new(elementInterface)
+		accessibilityInterface := elementInterface(s)
+		a, pass, description := accessibilityInterface.Check()
+		return a, pass, description, nil
 	}
-	return 1, false, ""
+	return 1, false, "", errors.New("No defined evaluator function for this html element")
 }
