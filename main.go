@@ -45,15 +45,15 @@ func GetPage(url string) (*goquery.Document, string, error) {
 	return Document, Html, nil
 }
 
-func Check(s *goquery.Selection, Report *report.AccessibilityReport) {
+func Check(s *goquery.Selection, accessibilityReport *report.AccessibilityReport) {
 	s.Each(func(i int, s *goquery.Selection) {
 		elementName := goquery.NodeName(s)
 		Html, _ := goquery.OuterHtml(s)
-		A, Pass, Description, err := accessibility.NewCheck(s)
+		A, Pass, Description, err := accessibility.NewCheck(s, accessibilityReport)
 		if err == nil {
-			Report.AddCheck(elementName, A, Pass, Description, Html)
+			accessibilityReport.AddCheck(elementName, A, Pass, Description, Html)
 		}
-		Check(s.Children(), Report)
+		Check(s.Children(), accessibilityReport)
 	})
 }
 
@@ -65,7 +65,7 @@ func EvaluatePage(url string, reportFilename string, lang string) {
 		log.Fatal(err)
 	}
 
-	title := Document.Find("title").Text()
+	title := Document.Find("head title").Text()
 	log.Printf("Evaluating page with title: %s", title)
 
 	Report := report.NewAccessibilityReport(url, title, lang)

@@ -1,6 +1,9 @@
 package accessibility
 
-import "github.com/PuerkitoBio/goquery"
+import (
+	"github.com/PuerkitoBio/goquery"
+	"github.com/inclunet/accessibility/pkg/report"
+)
 
 type Images struct {
 	Element
@@ -24,8 +27,9 @@ func (i *Images) Check() (int, bool, string) {
 	return 1, true, "There is no errors on your image alternative text description."
 }
 
-func NewImageCheck(s *goquery.Selection) Accessibility {
+func NewImageCheck(s *goquery.Selection, accessibilityReport *report.AccessibilityReport) Accessibility {
 	accessibilityInterface := new(Images)
 	accessibilityInterface.Selection = s
+	accessibilityInterface.AccessibilityReport = accessibilityReport
 	return accessibilityInterface
 }

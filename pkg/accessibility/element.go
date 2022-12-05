@@ -2,10 +2,12 @@ package accessibility
 
 import (
 	"github.com/PuerkitoBio/goquery"
+	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Element struct {
-	Selection *goquery.Selection
+	Selection           *goquery.Selection
+	AccessibilityReport *report.AccessibilityReport
 }
 
 func (e *Element) AlternativeText() (string, bool) {
