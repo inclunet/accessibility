@@ -11,9 +11,20 @@ type Links struct {
 
 func (l *Links) Check() (int, bool, string) {
 	if !l.AriaHidden() {
-		if accessibleText, ok := l.AccessibleText(); ok && len(accessibleText) > 3 {
+		accessibleText, ok := l.AccessibleText()
+
+		if !ok {
+			A, Pass, Description, err := DeepCheck(l.Selection.Children(), l.AccessibilityReport)
+			if err == nil {
+				return A, Pass, Description
+			}
+
+		}
+
+		if ok && len(accessibleText) > 3 {
 			return 1, true, "This link are providing a valid    description text for screen readers."
 		}
+
 		return 1, false, "If your link is not hidden, you need a text description for screen reader software."
 	}
 	return 1, true, "Hidden Links do not need text description."
