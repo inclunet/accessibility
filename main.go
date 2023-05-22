@@ -77,6 +77,7 @@ func EvaluatePage(url string, reportFilename string, lang string) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
+
 		log.Printf("Evaluation report generated on %s file.", reportFilename)
 	}
 }

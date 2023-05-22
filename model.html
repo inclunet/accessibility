@@ -9,7 +9,16 @@
         <div id="summary">
             <div id="ReportHeader">
                 <h1>{{.Title}} accessibility evaluate results</h1>
-                <p>The evaluation results for {{.URL}} whas returned </p>
+                <table border="1">
+                    <tr>
+                        <td>Page:</td>
+                        <td>{{.Title}}</td>
+                    </tr>
+                    <tr>
+                        <td>URL:</td>
+                        <td><a href="{{.URL}}">{{.URL}}</a></td>
+                    </tr>
+                </table>
             </div>
             <div id="summary">
                 <h2>Accessibility Summary</h2>
@@ -19,12 +28,14 @@
                         <th>Total</th>
                         <th>Errors</th>
                         <th>Pass</th>
+                        <th>Rate</th>
                     </tr>
                     <tr>
                         <td>Total evaluated elements</td>
                         <td>{{.Total}}</td>
-                         <td>{{.Errors}}</td>
-                         <td>{{.Pass}}</td>
+                        <td>{{.Errors}}</td>
+                        <td>{{.Pass}}</td>
+                    <td>N/A</td>
                     </tr>
                     {{range $element, $content := .Summary}}
                     <tr>
@@ -32,6 +43,7 @@
                         <td>{{$content.Total}}</td>
                         <td>{{$content.Errors}}</td>
                         <td>{{$content.Pass}}</td>
+                        <td>{{$content.Rat}}</td>
                     </tr>
                     {{end}}
                 </table>

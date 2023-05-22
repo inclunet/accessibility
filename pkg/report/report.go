@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"html/template"
 	"os"
 )
@@ -48,10 +49,26 @@ func (r *AccessibilityReport) GenerateSummary() {
 	}
 }
 
-func (r *AccessibilityReport) Save(report string) error {
+func (r *AccessibilityReport) Save(fileName string) error {
+	err := r.SaveHtmlReport(fileName + ".html")
+
+	if err != nil {
+		return err
+	}
+
+	err = r.SaveJsonReport(fileName + ".json")
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AccessibilityReport) SaveHtmlReport(fileName string) error {
 	Template := template.Must(template.New("model.html").ParseFiles("model.html"))
 
-	File, err := os.Create(report)
+	File, err := os.Create(fileName)
 
 	if err != nil {
 		return err
@@ -60,6 +77,26 @@ func (r *AccessibilityReport) Save(report string) error {
 	defer File.Close()
 
 	err = Template.Execute(File, r)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *AccessibilityReport) SaveJsonReport(fileName string) error {
+	File, err := os.Create(fileName)
+
+	if err != nil {
+		return err
+	}
+
+	defer File.Close()
+
+	jsonContent, err := json.Marshal(r)
+
+	_, err = File.Write(jsonContent)
 
 	if err != nil {
 		return err
