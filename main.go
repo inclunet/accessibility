@@ -8,11 +8,13 @@ import (
 
 func main() {
 	var url string
-	var report string
+	var reportPath string
+	var reportPrefix string
 	var lang string
 	flag.StringVar(&url, "url", "https://inclunet.com.br", "Url to check accessibility")
-	flag.StringVar(&report, "report", "report.html", "Output filename to generate final html report")
+	flag.StringVar(&reportPath, "report-path", "reports", "Output file path to generate final report files")
+	flag.StringVar(&reportPrefix, "report-prefix", "pagina_", "Output file prefix to generate final report files")
 	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
 	flag.Parse()
-	accessibility.EvaluatePage(url, report, lang)
+	accessibility.EvaluatePage(url, reportPrefix, reportPath, lang)
 }

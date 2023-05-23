@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"os"
+	"strings"
 )
 
 type AccessibilityCheck struct {
@@ -49,14 +50,54 @@ func (r *AccessibilityReport) GenerateSummary() {
 	}
 }
 
-func (r *AccessibilityReport) Save(fileName string) error {
-	err := r.SaveHtmlReport(fileName + ".html")
+func (r *AccessibilityReport) GetDomainName() string {
+	if domainName := strings.Split(strings.Split(r.URL, "://")[1], "/")[0]; domainName != "" {
+		return domainName
+	}
+	return "default"
+}
+
+func (r *AccessibilityReport) getReportPath(reportPath string) (string, error) {
+	domainName := r.GetDomainName()
+	reportPath = reportPath + "/" + domainName
+
+	if _, err := os.Stat(reportPath); os.IsNotExist(err) {
+		err = os.Mkdir(reportPath, 0755)
+
+		if err != nil {
+			return "", err
+		}
+
+		err := os.Mkdir(reportPath+"/html", 0755)
+
+		if err != nil {
+			return "", err
+		}
+
+		err = os.Mkdir(reportPath+"/json", 0755)
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return reportPath, nil
+}
+
+func (r *AccessibilityReport) Save(reportPath string, reportFilename string) error {
+	reportPath, err := r.getReportPath(reportPath)
 
 	if err != nil {
 		return err
 	}
 
-	err = r.SaveJsonReport(fileName + ".json")
+	err = r.SaveHtmlReport(reportPath + "/html/" + reportFilename + ".html")
+
+	if err != nil {
+		return err
+	}
+
+	err = r.SaveJsonReport(reportPath + "/json/" + reportFilename + ".json")
 
 	if err != nil {
 		return err
