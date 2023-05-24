@@ -30,7 +30,7 @@ func (b *Buttons) Check() (int, bool, string) {
 	return 1, true, "Hidden buttons do not need text description."
 }
 
-func NewButtonCheck(s *goquery.Selection, accessibilityReport *report.AccessibilityReport) Accessibility {
+func NewButtonCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
 	accessibilityInterface := new(Buttons)
 	accessibilityInterface.Selection = s
 	accessibilityInterface.AccessibilityReport = accessibilityReport

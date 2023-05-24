@@ -67,7 +67,7 @@ func (i *Inputs) Check() (int, bool, string) {
 	return 1, false, "If your input field is not hidden, you need a label text description for screen reader software users."
 }
 
-func NewInputCheck(s *goquery.Selection, accessibilityReport *report.AccessibilityReport) Accessibility {
+func NewInputCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
 	accessibilityInterface := new(Inputs)
 	accessibilityInterface.Selection = s
 	accessibilityInterface.AccessibilityReport = accessibilityReport

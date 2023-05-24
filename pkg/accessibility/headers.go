@@ -62,7 +62,7 @@ func (h *Headers) Check() (int, bool, string) {
 	}
 }
 
-func NewHeaderCheck(s *goquery.Selection, accessibilityReport *report.AccessibilityReport) Accessibility {
+func NewHeaderCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
 	accessibilityInterface := new(Headers)
 	accessibilityInterface.Selection = s
 	accessibilityInterface.AccessibilityReport = accessibilityReport

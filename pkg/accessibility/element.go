@@ -7,7 +7,7 @@ import (
 
 type Element struct {
 	Selection           *goquery.Selection
-	AccessibilityReport *report.AccessibilityReport
+	AccessibilityReport report.AccessibilityReport
 }
 
 func (e *Element) AlternativeText() (string, bool) {

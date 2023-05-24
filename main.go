@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/inclunet/accessibility/pkg/accessibility"
+	"github.com/inclunet/accessibility/pkg/checker"
 )
 
 func main() {
@@ -16,5 +16,5 @@ func main() {
 	flag.StringVar(&reportPrefix, "report-prefix", "pagina_", "Output file prefix to generate final report files")
 	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
 	flag.Parse()
-	accessibility.EvaluatePage(url, reportPrefix, reportPath, lang)
+	checker.NewPageCheck(url, reportPrefix, reportPath, lang)
 }
