@@ -9,12 +9,20 @@ import (
 func main() {
 	var url string
 	var reportPath string
-	var reportPrefix string
+	var reportFile string
 	var lang string
-	flag.StringVar(&url, "url", "https://inclunet.com.br", "Url to check accessibility")
+	var checkList string
+	flag.StringVar(&url, "url", "", "Url to check accessibility")
 	flag.StringVar(&reportPath, "report-path", "reports", "Output file path to generate final report files")
-	flag.StringVar(&reportPrefix, "report-prefix", "pagina_", "Output file prefix to generate final report files")
+	flag.StringVar(&reportFile, "report", "pagina", "Output file prefix to generate final report files")
 	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
+	flag.StringVar(&checkList, "check-list", "", "List of pages to check")
 	flag.Parse()
-	checker.NewPageCheck(url, reportPrefix, reportPath, lang)
+	evaluator := checker.NewChecker(checkList)
+	evaluator.GetDomainName(url)
+	evaluator.Lang = lang
+	evaluator.ReportPath = reportPath
+	evaluator.AddCheckListItem(url, reportFile, lang, reportPath)
+	evaluator.CheckAllList()
+	evaluator.SaveAllReports()
 }

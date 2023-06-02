@@ -2,34 +2,36 @@ package accessibility
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Images struct {
 	Element
 }
 
-func (i *Images) isValidAlternativeDescription() bool {
-	if accessibleText, ok := i.AccessibleText(); ok && len(accessibleText) >= 3 {
-		return true
-	}
-	return false
-}
+func (i *Images) Check() AccessibilityCheck {
+	accessibilityCheck := i.NewAccessibilityCheck(1, "No aria-hidden images needs a valid accessibility text description.")
 
-func (i *Images) Check() (int, bool, string) {
-	description := i.isValidAlternativeDescription()
-	hidden := i.AriaHidden()
-
-	if !description && !hidden {
-		return 1, false, "No hidden imagens needs a descriptionfor accessibility"
+	if i.AriaHidden() {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Aria-hidden images do not need a valid accessibility text description"
+		return accessibilityCheck
 	}
 
-	return 1, true, "There is no errors on your image alternative text description."
+	if accessibleText, ok := i.AccessibleText(); ok {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Please verify if your image has a good description"
+
+		if len(accessibleText) >= 3 {
+			accessibilityCheck.Description = "This image contains a good descriptiion"
+		}
+	}
+
+	return accessibilityCheck
 }
 
-func NewImageCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
+func NewImageCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
 	accessibilityInterface := new(Images)
 	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityReport = accessibilityReport
+	accessibilityInterface.AccessibilityChecks = accessibilityChecks
 	return accessibilityInterface
 }

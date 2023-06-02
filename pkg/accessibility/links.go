@@ -2,37 +2,46 @@ package accessibility
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Links struct {
 	Element
 }
 
-func (l *Links) Check() (int, bool, string) {
-	if !l.AriaHidden() {
-		accessibleText, ok := l.AccessibleText()
+func (l *Links) Check() AccessibilityCheck {
+	accessibilityCheck := l.NewAccessibilityCheck(1, "no hidden links needs a accessible text description for screen reader software.")
 
-		if !ok {
-			A, Pass, Description, err := DeepCheck(l.Selection.Children(), l.AccessibilityReport)
-			if err == nil {
-				return A, Pass, Description
-			}
-
-		}
-
-		if ok && len(accessibleText) > 3 {
-			return 1, true, "This link are providing a valid    description text for screen readers."
-		}
-
-		return 1, false, "If your link is not hidden, you need a text description for screen reader software."
+	if l.AriaHidden() {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Hidden Links do not need an accessible text description for screen readers"
+		return accessibilityCheck
 	}
-	return 1, true, "Hidden Links do not need text description."
+
+	accessibleText, ok := l.AccessibleText()
+
+	if !ok {
+		accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks)
+
+		if err == nil {
+			return accessibilityCheck
+		}
+	}
+
+	if ok {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Short alternative text       do not provide good for screen readers."
+
+		if len(accessibleText) > 3 {
+			accessibilityCheck.Description = "This link are providing a valid    description text for screen readers."
+		}
+	}
+
+	return accessibilityCheck
 }
 
-func NewLinkCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
+func NewLinkCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
 	accessibilityInterface := new(Links)
 	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityReport = accessibilityReport
+	accessibilityInterface.AccessibilityChecks = accessibilityChecks
 	return accessibilityInterface
 }

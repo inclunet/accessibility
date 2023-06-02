@@ -1,157 +1,54 @@
 package report
 
 import (
-	"encoding/json"
-	"html/template"
-	"os"
-	"strings"
+	"github.com/inclunet/accessibility/pkg/accessibility"
 )
 
-type AccessibilityCheck struct {
-	Element     string
-	A           int
-	Pass        bool
-	Description string
-	Line        int
-	Html        string
-}
-
 type AccessibilityReport struct {
-	URL     string
-	Title   string
-	Lang    string
-	Pass    int
-	Errors  int
-	Total   int
-	Summary map[string]AccessibilitySummary
-	Checks  []AccessibilityCheck
+	Checks     []accessibility.AccessibilityCheck
+	Domain     string
+	Errors     int
+	Html       string
+	Pass       int
+	ReportFile string
+	Summary    map[string]AccessibilitySummary
+	Title      string
+	Total      int
+	Url        string
 }
 
-func (r *AccessibilityReport) AddCheck(Element string, a int, pass bool, description string, Html string) {
-	r.Checks = append(r.Checks, AccessibilityCheck{Element: Element, A: a, Pass: pass, Description: description, Html: Html})
-	r.UpdateSummary(Element, pass)
+func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.AccessibilityCheck) {
+	r.Checks = append(r.Checks, accessibilityCheck)
+	r.UpdateSummary(accessibilityCheck)
 }
 
-func (r *AccessibilityReport) UpdateSummary(Element string, Pass bool) {
-	Summary, _ := r.Summary[Element]
-	Summary.Update(Pass)
+func (r *AccessibilityReport) UpdateSummary(accessibilityCheck accessibility.AccessibilityCheck) {
+	Summary, _ := r.Summary[accessibilityCheck.Element]
+	Summary.Update(accessibilityCheck.Pass)
 	r.Total = r.Total + 1
-	if Pass {
+	if accessibilityCheck.Pass {
 		r.Pass = r.Pass + 1
 	} else {
 		r.Errors = r.Errors + 1
 	}
-	r.Summary[Element] = Summary
+	r.Summary[accessibilityCheck.Element] = Summary
 }
 
 func (r *AccessibilityReport) GenerateSummary() {
-	for _, check := range r.Checks {
-		r.UpdateSummary(check.Element, check.Pass)
+	for _, accessibilityCheck := range r.Checks {
+		r.UpdateSummary(accessibilityCheck)
 	}
 }
 
-func (r *AccessibilityReport) GetDomainName() string {
-	if domainName := strings.Split(strings.Split(r.URL, "://")[1], "/")[0]; domainName != "" {
-		return domainName
-	}
-	return "default"
+func (r *AccessibilityReport) NewSummary() {
+	r.Summary = make(map[string]AccessibilitySummary)
 }
 
-func (r *AccessibilityReport) getReportPath(reportPath string) (string, error) {
-	domainName := r.GetDomainName()
-	reportPath = reportPath + "/" + domainName
-
-	if _, err := os.Stat(reportPath); os.IsNotExist(err) {
-		err = os.Mkdir(reportPath, 0755)
-
-		if err != nil {
-			return "", err
-		}
-
-		err := os.Mkdir(reportPath+"/html", 0755)
-
-		if err != nil {
-			return "", err
-		}
-
-		err = os.Mkdir(reportPath+"/json", 0755)
-
-		if err != nil {
-			return "", err
-		}
+func NewAccessibilityReport(url string, reportFile string, lang string, reportPath string, title string) AccessibilityReport {
+	return AccessibilityReport{
+		Url:        url,
+		Title:      title,
+		ReportFile: reportFile,
+		Summary:    make(map[string]AccessibilitySummary),
 	}
-
-	return reportPath, nil
-}
-
-func (r *AccessibilityReport) Save(reportPath string, reportFilename string) error {
-	reportPath, err := r.getReportPath(reportPath)
-
-	if err != nil {
-		return err
-	}
-
-	err = r.SaveHtmlReport(reportPath + "/html/" + reportFilename + ".html")
-
-	if err != nil {
-		return err
-	}
-
-	err = r.SaveJsonReport(reportPath + "/json/" + reportFilename + ".json")
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *AccessibilityReport) SaveHtmlReport(fileName string) error {
-	Template := template.Must(template.New("model.html").ParseFiles("model.html"))
-
-	File, err := os.Create(fileName)
-
-	if err != nil {
-		return err
-	}
-
-	defer File.Close()
-
-	err = Template.Execute(File, r)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *AccessibilityReport) SaveJsonReport(fileName string) error {
-	File, err := os.Create(fileName)
-
-	if err != nil {
-		return err
-	}
-
-	defer File.Close()
-
-	jsonContent, err := json.Marshal(r)
-
-	_, err = File.Write(jsonContent)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func NewAccessibilityReport(url string, title string, lang string) AccessibilityReport {
-	Report := AccessibilityReport{
-		URL:     url,
-		Title:   title,
-		Lang:    lang,
-		Summary: make(map[string]AccessibilitySummary),
-	}
-	return Report
 }

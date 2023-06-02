@@ -2,7 +2,6 @@ package accessibility
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Inputs struct {
@@ -45,31 +44,43 @@ func (i *Inputs) FindLabel() bool {
 	return false
 }
 
-func (i *Inputs) Check() (int, bool, string) {
+func (i *Inputs) Check() AccessibilityCheck {
+	accessibilityCheck := i.NewAccessibilityCheck(1, "If your input field is not hidden, you need a label text description for screen reader software users.")
+
 	if i.AriaHidden() {
-		return 1, true, "aria-hidden inputs do not need text description."
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "aria-hidden inputs do not need text description."
+		return accessibilityCheck
 	}
 
 	if i.isHiddenField() {
-		return 1, true, "Hidden fields do not need description or label"
+		accessibilityCheck.Description = "Hidden fields do not need description or label"
+		return accessibilityCheck
 	}
 
 	if i.FindLabel() {
-		return 1, true, "This input has  a valid    label description text for screen readers."
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "This input has  a valid    label description text for screen readers."
+		return accessibilityCheck
 	}
 
 	accessibleText, ok := i.AccessibleText()
 
-	if ok && len(accessibleText) > 3 {
-		return 1, true, "This link are providing a valid    description text for screen readers."
+	if ok {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Short descriptions are not a good accessiblity practice for images"
+
+		if len(accessibleText) > 3 {
+			accessibilityCheck.Description = "This link are providing a valid    description text for screen readers."
+		}
 	}
 
-	return 1, false, "If your input field is not hidden, you need a label text description for screen reader software users."
+	return accessibilityCheck
 }
 
-func NewInputCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
+func NewInputCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
 	accessibilityInterface := new(Inputs)
 	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityReport = accessibilityReport
+	accessibilityInterface.AccessibilityChecks = accessibilityChecks
 	return accessibilityInterface
 }

@@ -16,7 +16,7 @@
                     </tr>
                     <tr>
                         <td>URL:</td>
-                        <td><a href="{{.URL}}">{{.URL}}</a></td>
+                        <td><a href="{{.Url}}">{{.Url}}</a></td>
                     </tr>
                 </table>
             </div>
@@ -35,7 +35,7 @@
                         <td>{{.Total}}</td>
                         <td>{{.Errors}}</td>
                         <td>{{.Pass}}</td>
-                    <td>N/A</td>
+                        <td>N/A</td>
                     </tr>
                     {{range $element, $content := .Summary}}
                     <tr>
@@ -53,7 +53,8 @@
                 {{if $check.Pass}}
 
                 {{else}}
-                <p>{{$check.Description}} {{$check.Html}}</p>
+                <p>{{$check.Description}}</p>
+                <p>{{$check.Html}}</p>
                 {{end}}
                 {{end}}
             </div>

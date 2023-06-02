@@ -5,15 +5,23 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Headers struct {
 	Element
 }
 
-func (h *Headers) isHeader(elementName string) bool {
-	switch elementName {
+func (h *Headers) GetHeaderLevel(accessibilityCheck AccessibilityCheck) (int, bool) {
+	if h.isHeader(accessibilityCheck) {
+		level, _ := strconv.Atoi(strings.TrimPrefix(accessibilityCheck.Element, "h"))
+		return level, true
+	}
+
+	return 0, false
+}
+
+func (h *Headers) isHeader(accessibilityCheck AccessibilityCheck) bool {
+	switch accessibilityCheck.Element {
 	case "h1", "h2", "h3", "h4", "h5", "h6":
 		return true
 	default:
@@ -21,50 +29,59 @@ func (h *Headers) isHeader(elementName string) bool {
 	}
 }
 
-func (h *Headers) isIncorrectLevel(last int, actual int) bool {
-	return actual > last+1
+func (h *Headers) isIncorrectLevel(headerLevel int, currentLevel int) bool {
+	return currentLevel > headerLevel+1
 }
 
-func (h *Headers) isTooLongHeader() bool {
-	if accessibleText, ok := h.AccessibleText(); ok && len(accessibleText) > 80 {
-		return true
-	}
-	return false
-}
-
-func (h *Headers) CheckHierarchy(elementName string) bool {
+func (h *Headers) CheckHierarchy(accessibilityCheck AccessibilityCheck) bool {
+	accessibilityChecks := append(h.AccessibilityChecks, accessibilityCheck)
 	headerLevel := 0
-	for _, check := range h.AccessibilityReport.Checks {
-		if h.isHeader(check.Element) {
-			actualLevel, _ := strconv.Atoi(strings.TrimPrefix(check.Element, "h"))
-			if h.isIncorrectLevel(headerLevel, actualLevel) {
+
+	for _, accessibilityCheck := range accessibilityChecks {
+		if currentLevel, ok := h.GetHeaderLevel(accessibilityCheck); ok {
+			if h.isIncorrectLevel(headerLevel, currentLevel) {
 				return false
 			}
-			headerLevel = actualLevel
+
+			headerLevel = currentLevel
 		}
 	}
-	actualLevel, _ := strconv.Atoi(strings.TrimPrefix(elementName, "h"))
-	if h.isIncorrectLevel(headerLevel, actualLevel) {
-		return false
-	} else {
-		return true
-	}
+
+	return true
 }
 
-func (h *Headers) Check() (int, bool, string) {
-	switch {
-	case h.CheckHierarchy(goquery.NodeName(h.Selection)):
-		return 1, true, "Please check if this header is following the headers hierarchy"
-	case h.isTooLongHeader():
-		return 1, false, "Please check if this header is too longh, too long headers is not presented at a single line and is possibly a bad practice."
-	default:
-		return 1, true, "The headers are ok"
+func (h *Headers) Check() AccessibilityCheck {
+	accessibilityCheck := h.NewAccessibilityCheck(1, "Please check if this header is following the headers hierarchy")
+
+	if h.AriaHidden() {
+		accessibilityCheck.Pass = true
+		accessibilityCheck.Description = "Aria-hidden headers do not need to follow ierarchi or needs a accessibility text description"
+		return accessibilityCheck
 	}
+
+	if h.CheckHierarchy(accessibilityCheck) {
+		accessibilityCheck.Description = "This header is following correct ierarchi but do not have a text description"
+
+		if accessibleText, ok := h.AccessibleText(); ok {
+			accessibilityCheck.Pass = true
+			accessibilityCheck.Description = "This header are ok"
+
+			if h.CheckTooShortText(accessibleText) {
+				accessibilityCheck.Description = "Small headers can not provide information to screen readers"
+			}
+
+			if h.CheckTooLongText(accessibleText, 80) {
+				accessibilityCheck.Description = "Please check if this header is too longh, too long headers is not presented at a single line and is possibly a bad practice."
+			}
+		}
+	}
+
+	return accessibilityCheck
 }
 
-func NewHeaderCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
+func NewHeaderCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
 	accessibilityInterface := new(Headers)
 	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityReport = accessibilityReport
+	accessibilityInterface.AccessibilityChecks = accessibilityChecks
 	return accessibilityInterface
 }

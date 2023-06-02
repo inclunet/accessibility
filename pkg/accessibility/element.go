@@ -1,13 +1,14 @@
 package accessibility
 
 import (
+	"html"
+
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Element struct {
 	Selection           *goquery.Selection
-	AccessibilityReport report.AccessibilityReport
+	AccessibilityChecks []AccessibilityCheck
 }
 
 func (e *Element) AlternativeText() (string, bool) {
@@ -51,6 +52,37 @@ func (e *Element) AccessibleText() (string, bool) {
 	return "", false
 }
 
+func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
+	accessibilityCheck, err := NewElementCheck(s, accessibilityChecks)
+
+	if err != nil {
+		s.Each(func(i int, s *goquery.Selection) {
+			accessibilityCheck, err = e.DeepCheck(s.Children(), accessibilityChecks)
+		})
+	}
+	return accessibilityCheck, err
+}
+
+func (e *Element) CheckTooLongText(accessibilityText string, maxLength int) bool {
+	return len(accessibilityText) > maxLength
+}
+
+func (e *Element) CheckTooShortText(accessibilityText string) bool {
+	return len(accessibilityText) < 3
+}
+
+func (e *Element) NewAccessibilityCheck(a int, description string) AccessibilityCheck {
+	htmlElement, _ := goquery.OuterHtml(e.Selection)
+	return AccessibilityCheck{
+		Element:     goquery.NodeName(e.Selection),
+		A:           a,
+		Pass:        false,
+		Warning:     false,
+		Description: description,
+		Html:        html.EscapeString(htmlElement),
+	}
+}
+
 func (e *Element) Role() (string, bool) {
 	if role, ok := e.Selection.Attr("role"); ok && role != "" {
 		return role, ok
@@ -63,4 +95,15 @@ func (e *Element) Title() (string, bool) {
 		return accessibleText, true
 	}
 	return "", false
+}
+
+func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
+	elementInterface, err := GetElementInterface(goquery.NodeName(s))
+
+	if err != nil {
+		return AccessibilityCheck{}, err
+	}
+
+	accessibilityInterface := elementInterface(s, accessibilityChecks)
+	return accessibilityInterface.Check(), nil
 }

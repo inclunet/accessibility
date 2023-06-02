@@ -2,37 +2,44 @@ package accessibility
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/inclunet/accessibility/pkg/report"
 )
 
 type Buttons struct {
 	Element
 }
 
-func (b *Buttons) Check() (int, bool, string) {
+func (b *Buttons) Check() AccessibilityCheck {
+	accessibilityCheck := b.NewAccessibilityCheck(1, "Hidden buttons do not need accessibility description.")
+	accessibilityCheck.Pass = true
+
 	if !b.AriaHidden() {
+		accessibilityCheck.Pass = false
+		accessibilityCheck.Description = "No hidden buttons needs a accessible description text to screen readers"
 		accessibleText, ok := b.AccessibleText()
 
 		if !ok {
-			A, Pass, Description, err := DeepCheck(b.Selection.Children(), b.AccessibilityReport)
+			accessibilityCheck, err := b.DeepCheck(b.Selection.Children(), b.AccessibilityChecks)
 			if err == nil {
-				return A, Pass, Description
+				return accessibilityCheck
 			}
-
 		}
 
-		if ok && len(accessibleText) > 3 {
-			return 1, true, "This button are providing a valid    description text for screen readers."
-		}
+		if ok {
+			accessibilityCheck.Pass = true
+			accessibilityCheck.Description = "Short descriptions do not provid good information to blind people."
 
-		return 1, false, "If your button is not hidden, you need a text description for screen reader software."
+			if len(accessibleText) > 3 {
+				accessibilityCheck.Description = "This button are providing a valid    description text for screen readers."
+			}
+		}
 	}
-	return 1, true, "Hidden buttons do not need text description."
+
+	return accessibilityCheck
 }
 
-func NewButtonCheck(s *goquery.Selection, accessibilityReport report.AccessibilityReport) Accessibility {
+func NewButtonCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
 	accessibilityInterface := new(Buttons)
 	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityReport = accessibilityReport
+	accessibilityInterface.AccessibilityChecks = accessibilityChecks
 	return accessibilityInterface
 }
