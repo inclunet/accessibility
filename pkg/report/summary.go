@@ -1,35 +1,33 @@
 package report
 
-import "math"
+import (
+	"math"
+
+	"github.com/inclunet/accessibility/pkg/accessibility"
+)
 
 type AccessibilitySummary struct {
-	Pass   int
-	Errors int
-	Total  int
-	Rat    float32
+	Pass     int
+	Errors   int
+	Rat      float32
+	Total    int
+	Warnings int
 }
 
-func (s *AccessibilitySummary) Count() {
-	s.Total = s.Total + 1
-	s.UpdateRat()
-}
+func (s *AccessibilitySummary) Update(accessibilityCheck accessibility.AccessibilityCheck) {
+	s.Total++
 
-func (s *AccessibilitySummary) AddError() {
-	s.Errors = s.Errors + 1
-	s.Count()
-}
-
-func (s *AccessibilitySummary) AddPass() {
-	s.Pass = s.Pass + 1
-	s.Count()
-}
-
-func (s *AccessibilitySummary) Update(Pass bool) {
-	if Pass {
-		s.AddPass()
-	} else {
-		s.AddError()
+	if accessibilityCheck.Warning {
+		s.Warnings++
 	}
+
+	if accessibilityCheck.Pass {
+		s.Pass++
+	} else {
+		s.Errors++
+	}
+
+	s.UpdateRat()
 }
 
 func (s *AccessibilitySummary) UpdateRat() {

@@ -2,6 +2,11 @@
 
 <head>
     <title>Accessibility Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -9,43 +14,48 @@
         <div id="summary">
             <div id="ReportHeader">
                 <h1>{{.Title}} accessibility evaluate results</h1>
-                <table border="1">
-                    <tr>
-                        <td>Page:</td>
-                        <td>{{.Title}}</td>
-                    </tr>
-                    <tr>
-                        <td>URL:</td>
-                        <td><a href="{{.Url}}">{{.Url}}</a></td>
-                    </tr>
+                <table class="table">
+                    <caption>Page data for evaluation</caption>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Page:</th>
+                            <td>{{.Title}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Domain:</th>
+                            <td>{{.Domain}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">URL:</th>
+                            <td><a href="{{.Url}}">{{.Url}}</a></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             <div id="summary">
-                <h2>Accessibility Summary</h2>
-                <table>
-                    <tr>
-                        <th>Element</th>
-                        <th>Total</th>
-                        <th>Errors</th>
-                        <th>Pass</th>
-                        <th>Rate</th>
-                    </tr>
-                    <tr>
-                        <td>Total evaluated elements</td>
-                        <td>{{.Total}}</td>
-                        <td>{{.Errors}}</td>
-                        <td>{{.Pass}}</td>
-                        <td>N/A</td>
-                    </tr>
-                    {{range $element, $content := .Summary}}
-                    <tr>
-                        <td>{{$element}}</td>
-                        <td>{{$content.Total}}</td>
-                        <td>{{$content.Errors}}</td>
-                        <td>{{$content.Pass}}</td>
-                        <td>{{$content.Rat}}</td>
-                    </tr>
-                    {{end}}
+                <h2>Violation Summary</h2>
+                <table class="table table-bordered">
+                    <caption>Violations Summary</caption>
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Element</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Errors</th>
+                            <th scope="col">Pass</th>
+                            <th scope="col">Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $element, $content := .Summary}}
+                        <tr>
+                            <th scope="row">{{$element}}</th>
+                            <td>{{$content.Total}}</td>
+                            <td>{{$content.Errors}}</td>
+                            <td>{{$content.Pass}}</td>
+                            <td>{{$content.Rat}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
                 </table>
             </div>
             <div id="details">
