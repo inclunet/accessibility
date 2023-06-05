@@ -58,14 +58,30 @@
                     </tbody>
                 </table>
             </div>
-            <div id="details">
-                {{range $i, $check := .Checks}}
-                {{if $check.Pass}}
-
-                {{else}}
-                <p>{{$check.Description}}</p>
-                <p>{{$check.Html}}</p>
-                {{end}}
+            <div class="accordion" id="details">
+                <h2>Evaluation Result Details</h2>
+                {{range $element, $summary := .Summary}}
+                <div class="accordion-item">
+                    <h3 class="accordion-header" id="header{{$element}}">
+                        <button type=" button" class="accordion-button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse{{$element}}" aria-expanded="false"
+                            aria-controls="collapse{{$element}}">
+                            {{$element}}
+                        </button>
+                    </h3>
+                    <div id="collapse{{$element}}" class="collapse" aria-labelledby="header{{$element}}"
+                        data-bs-parent="#details">
+                        <div class="card-body">
+                            {{range $i, $check := $summary.Checks}}
+                            {{if eq $check.Pass false}}
+                            <p>{{$check.Description}}</p>
+                            <p>{{$check.Html}}</p>
+                            <p>{{$check.Text}}</p>
+                            {{end}}
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
                 {{end}}
             </div>
         </div>

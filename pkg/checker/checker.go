@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"text/template"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/inclunet/accessibility/pkg/accessibility"
@@ -235,8 +236,14 @@ func (c *AccessibilityChecker) SaveHtmlReport(data any, fileName string, templat
 
 	defer File.Close()
 
-	Template := template.Must(template.ParseFiles(templateFileName))
-	err = Template.Execute(File, data)
+	newTemplate := template.Must(template.ParseFiles(templateFileName))
+
+	if err != nil {
+		fmt.Println("8")
+		return err
+	}
+
+	err = newTemplate.Execute(File, data)
 
 	if err != nil {
 		return err

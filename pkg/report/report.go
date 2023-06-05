@@ -1,6 +1,9 @@
 package report
 
 import (
+	"html"
+	"strings"
+
 	"github.com/inclunet/accessibility/pkg/accessibility"
 )
 
@@ -15,7 +18,7 @@ type AccessibilityReport struct {
 }
 
 func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.AccessibilityCheck) {
-	r.Checks = append(r.Checks, accessibilityCheck)
+	r.Checks = append(r.Checks, r.GetLineNumber(accessibilityCheck))
 	r.UpdateSummary(accessibilityCheck)
 }
 
@@ -32,6 +35,17 @@ func (r *AccessibilityReport) GenerateSummary() {
 	for _, accessibilityCheck := range r.Checks {
 		r.UpdateSummary(accessibilityCheck)
 	}
+}
+
+func (r *AccessibilityReport) GetLineNumber(accessibilityCheck accessibility.AccessibilityCheck) accessibility.AccessibilityCheck {
+	text := html.UnescapeString(accessibilityCheck.Text)
+	offset := strings.Index(r.Html, text)
+
+	if offset > 0 {
+		accessibilityCheck.Line = strings.Count(r.Html[:offset], "\n")
+	}
+
+	return accessibilityCheck
 }
 
 func (r *AccessibilityReport) NewSummary() {

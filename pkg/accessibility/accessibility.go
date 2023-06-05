@@ -2,6 +2,7 @@ package accessibility
 
 import (
 	"errors"
+	"html/template"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -12,8 +13,9 @@ type AccessibilityCheck struct {
 	Pass        bool
 	Warning     bool
 	Description string
+	Html        template.HTML
 	Line        int
-	Html        string
+	Text        string
 }
 
 type Accessibility interface {

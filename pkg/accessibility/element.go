@@ -1,7 +1,7 @@
 package accessibility
 
 import (
-	"html"
+	"html/template"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -79,7 +79,8 @@ func (e *Element) NewAccessibilityCheck(a int, description string) Accessibility
 		Pass:        false,
 		Warning:     false,
 		Description: description,
-		Html:        html.EscapeString(htmlElement),
+		Html:        template.HTML(htmlElement),
+		Text:        htmlElement,
 	}
 }
 

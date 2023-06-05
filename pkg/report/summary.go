@@ -7,8 +7,9 @@ import (
 )
 
 type AccessibilitySummary struct {
-	Pass     int
+	Checks   []accessibility.AccessibilityCheck
 	Errors   int
+	Pass     int
 	Rat      float32
 	Total    int
 	Warnings int
@@ -28,6 +29,7 @@ func (s *AccessibilitySummary) Update(accessibilityCheck accessibility.Accessibi
 	}
 
 	s.UpdateRat()
+	s.Checks = append(s.Checks, accessibilityCheck)
 }
 
 func (s *AccessibilitySummary) UpdateRat() {
