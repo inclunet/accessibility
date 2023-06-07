@@ -54,6 +54,7 @@ func (i *Inputs) Check() AccessibilityCheck {
 	}
 
 	if i.isHiddenField() {
+		accessibilityCheck.Pass = true
 		accessibilityCheck.Description = "Hidden fields do not need description or label"
 		return accessibilityCheck
 	}

@@ -30,16 +30,17 @@ type Accessibility interface {
 
 func GetElementInterface(elementName string) (func(*goquery.Selection, []AccessibilityCheck) Accessibility, error) {
 	checkList := map[string]func(*goquery.Selection, []AccessibilityCheck) Accessibility{
-		"a":      NewLinkCheck,
-		"button": NewButtonCheck,
-		"h1":     NewHeaderCheck,
-		"h2":     NewHeaderCheck,
-		"h3":     NewHeaderCheck,
-		"h4":     NewHeaderCheck,
-		"h5":     NewHeaderCheck,
-		"h6":     NewHeaderCheck,
-		"input":  NewInputCheck,
-		"img":    NewImageCheck,
+		"a":       NewLinkCheck,
+		"amp-img": NewAmpImageCheck,
+		"button":  NewButtonCheck,
+		"h1":      NewHeaderCheck,
+		"h2":      NewHeaderCheck,
+		"h3":      NewHeaderCheck,
+		"h4":      NewHeaderCheck,
+		"h5":      NewHeaderCheck,
+		"h6":      NewHeaderCheck,
+		"input":   NewInputCheck,
+		"img":     NewImageCheck,
 	}
 
 	if elementInterface, ok := checkList[elementName]; ok {
