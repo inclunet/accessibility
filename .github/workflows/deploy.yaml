@@ -12,6 +12,6 @@ jobs:
       - name: Test
         run: go test -v ./...
       - name: Build
-        run: go build -v ./cmd/accessbot/main.go -o ./cmd/accessbot/accessbot
+        run: go build -v -o ./cmd/accessbot/accessbot ./cmd/accessbot/main.go
       - name: execut
         run: ./cmd/accessbot/accessbot
