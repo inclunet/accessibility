@@ -8,13 +8,15 @@ import (
 )
 
 type AccessibilityReport struct {
-	Checks     []accessibility.AccessibilityCheck
-	Domain     string
-	Html       string
-	ReportFile string
-	Summary    map[string]AccessibilitySummary
-	Title      string
-	Url        string
+	Checks         []accessibility.AccessibilityCheck
+	Domain         string
+	Html           string
+	HtmlReportPath string
+	JsonReportPath string
+	ReportFile     string
+	Summary        map[string]AccessibilitySummary
+	Title          string
+	Url            string
 }
 
 func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.AccessibilityCheck) {

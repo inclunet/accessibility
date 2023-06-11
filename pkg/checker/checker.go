@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -22,18 +21,14 @@ type AccessibilityChecker struct {
 	Date       string
 	Domain     string
 	Lang       string
-	Errors     int
-	Pass       int
 	ReportPath string
 	Reports    []report.AccessibilityReport
-	Total      int
-	TotalPages int
 }
 
 // this function store a new checklist entry for manual single checks requested be command line parameters.
 // It is necessary for some situations like input checklist file is not provided by user and an example is available in main.go file.
 func (c *AccessibilityChecker) AddCheckListItem(url string, reportFile string, lang string, reportPath string) {
-	if url != "" {
+	if url != "" && reportFile != "" {
 		c.Lang = lang
 		c.ReportPath = reportPath
 		newReport := report.AccessibilityReport{
@@ -190,38 +185,45 @@ func (c *AccessibilityChecker) LoadCheckList(fileName string) error {
 // the default reports root folder is "reports" and a domain folder is created automatically to store report files.
 func (c *AccessibilityChecker) SaveAllReports() {
 	log.Println("saving all reports...")
-	for _, accessibilityReport := range c.Reports {
-		log.Printf("saving report file for %s", accessibilityReport.ReportFile)
-		err := c.Save(accessibilityReport, accessibilityReport.ReportFile, "page-report.html")
+	var err error
+	for i, accessibilityReport := range c.Reports {
+		log.Printf("saving report file #%d for %s", i, accessibilityReport.ReportFile)
+		accessibilityReport.HtmlReportPath, accessibilityReport.JsonReportPath, err = c.Save(accessibilityReport, accessibilityReport.ReportFile, "page-report.html")
 
 		if err != nil {
 			log.Printf("is not possible to save report data: %s", err)
 		}
+
+		c.Reports[i] = accessibilityReport
 	}
 }
 
 // Save HTML and JSON report files.
 // tis function requires any struct and a template filename to construct reporte files and returns an error if this operation fails.
-func (c *AccessibilityChecker) Save(data any, reportFile string, templateFile string) error {
+func (c *AccessibilityChecker) Save(data any, reportFile string, templateFile string) (string, string, error) {
 	reportPath, err := c.getReportPath()
 
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	err = c.SaveHtmlReport(data, reportPath+"/html/"+reportFile+".html", c.ReportPath+"/templates/"+templateFile)
+	htmlReportPath := reportPath + "/html/" + reportFile + ".html"
+
+	err = c.SaveHtmlReport(data, htmlReportPath, c.ReportPath+"/templates/"+templateFile)
 
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	err = c.SaveJsonReport(data, reportPath+"/json/"+reportFile+".json")
+	jsonReportPath := reportPath + "/json/" + reportFile + ".json"
+
+	err = c.SaveJsonReport(data, jsonReportPath)
 
 	if err != nil {
-		return err
+		return htmlReportPath, "", err
 	}
 
-	return nil
+	return htmlReportPath, jsonReportPath, nil
 }
 
 // Save a HTML file from a global or individual page report struct.
@@ -239,7 +241,6 @@ func (c *AccessibilityChecker) SaveHtmlReport(data any, fileName string, templat
 	newTemplate := template.Must(template.ParseFiles(templateFileName))
 
 	if err != nil {
-		fmt.Println("8")
 		return err
 	}
 
@@ -282,7 +283,10 @@ func (c *AccessibilityChecker) SaveJsonReport(data any, fileName string) error {
 // This function returns an AccessibilityChecker object and espects a yaml input file wit a checklist to a batch evaluation.
 // If the imput checklist isn't informed, this functions return an AccessibilityObject but don't check any page.
 func NewChecker(fileName string) AccessibilityChecker {
-	newChecker := AccessibilityChecker{}
+	newChecker := AccessibilityChecker{
+		Lang:       "pt-br",
+		ReportPath: "reports",
+	}
 
 	if fileName != "" {
 		err := newChecker.LoadCheckList(fileName)
