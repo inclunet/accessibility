@@ -9,7 +9,9 @@ import (
 
 func main() {
 	log.Println("Starting accessibility checker bot service...")
-	bot, err := accessbot.New(os.Getenv("TELEGRAM_APITOKEN"))
+	token := os.Getenv("TELEGRAM_TOKEN")
+
+	bot, err := accessbot.New(token)
 
 	if err != nil {
 		log.Println(err)
