@@ -5,4 +5,4 @@ RUN apt-get install -y ca-certificates
 WORKDIR /accessbot
 COPY ./reports/templates/*.* /accessbot/reports/templates/*.*
 COPY ./cmd/accessbot/accessbot /usr/bin/accessbot
-# CMD accessbot
+CMD accessbot
