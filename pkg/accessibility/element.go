@@ -111,7 +111,7 @@ func (e *Element) SetSelection(s *goquery.Selection) {
 	e.Selection = s
 }
 
-func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
+func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck, accessibilityRules *map[string]AccessibilityRule) (AccessibilityCheck, error) {
 	accessibilityInterface, err := GetElementInterface(goquery.NodeName(s))
 
 	if err != nil {
@@ -120,6 +120,7 @@ func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCh
 
 	accessibilityInterface.SetSelection(s)
 	accessibilityInterface.SetAccessibilityChecks(accessibilityChecks)
+	accessibilityInterface.SetAccessibilityRules(accessibilityRules)
 
 	return accessibilityInterface.Check(), nil
 }
