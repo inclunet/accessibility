@@ -1,9 +1,5 @@
 package accessibility
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
-
 type Links struct {
 	Element
 }
@@ -37,11 +33,4 @@ func (l *Links) Check() AccessibilityCheck {
 	}
 
 	return accessibilityCheck
-}
-
-func NewLinkCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
-	accessibilityInterface := new(Links)
-	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityChecks = accessibilityChecks
-	return accessibilityInterface
 }

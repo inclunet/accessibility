@@ -3,8 +3,6 @@ package accessibility
 import (
 	"strconv"
 	"strings"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 type Headers struct {
@@ -77,11 +75,4 @@ func (h *Headers) Check() AccessibilityCheck {
 	}
 
 	return accessibilityCheck
-}
-
-func NewHeaderCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
-	accessibilityInterface := new(Headers)
-	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityChecks = accessibilityChecks
-	return accessibilityInterface
 }

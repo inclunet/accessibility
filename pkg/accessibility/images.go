@@ -1,9 +1,5 @@
 package accessibility
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
-
 type Images struct {
 	Element
 }
@@ -27,11 +23,4 @@ func (i *Images) Check() AccessibilityCheck {
 	}
 
 	return accessibilityCheck
-}
-
-func NewImageCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
-	accessibilityInterface := new(Images)
-	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityChecks = accessibilityChecks
-	return accessibilityInterface
 }

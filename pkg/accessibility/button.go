@@ -1,9 +1,5 @@
 package accessibility
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
-
 type Buttons struct {
 	Element
 }
@@ -35,11 +31,4 @@ func (b *Buttons) Check() AccessibilityCheck {
 	}
 
 	return accessibilityCheck
-}
-
-func NewButtonCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
-	accessibilityInterface := new(Buttons)
-	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityChecks = accessibilityChecks
-	return accessibilityInterface
 }
