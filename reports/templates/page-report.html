@@ -76,15 +76,18 @@
                             {{if eq $check.Pass false}}
                             <p>{{$check.Description}}</p>
                             <p>{{$check.Html}}</p>
-                            <p>{{$check.Text}}</p>
-                            {{end}}
-                            {{end}}
+                            <blockquote>
+                                {{$check.Text}}
+                            </blockquote>
                         </div>
+                        {{end}}
+                        {{end}}
                     </div>
                 </div>
-                {{end}}
             </div>
+            {{end}}
         </div>
+    </div>
 </body>
 
 </html>

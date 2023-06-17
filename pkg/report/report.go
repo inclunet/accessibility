@@ -1,7 +1,9 @@
 package report
 
 import (
+	"encoding/json"
 	"html"
+	"os"
 	"strings"
 
 	"github.com/inclunet/accessibility/pkg/accessibility"
@@ -14,6 +16,7 @@ type AccessibilityReport struct {
 	HtmlReportPath string
 	JsonReportPath string
 	ReportFile     string
+	Rules          map[string]accessibility.AccessibilityRule
 	Summary        map[string]AccessibilitySummary
 	Title          string
 	Url            string
@@ -22,6 +25,23 @@ type AccessibilityReport struct {
 func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.AccessibilityCheck) {
 	r.Checks = append(r.Checks, r.GetLineNumber(accessibilityCheck))
 	r.UpdateSummary(accessibilityCheck)
+}
+
+func (r *AccessibilityReport) LoadAccessibilityRules(filename string) error {
+	r.Rules = make(map[string]accessibility.AccessibilityRule)
+	accessibilityRulesFile, err := os.ReadFile(filename)
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(accessibilityRulesFile, &r.Rules)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *AccessibilityReport) UpdateSummary(accessibilityCheck accessibility.AccessibilityCheck) {

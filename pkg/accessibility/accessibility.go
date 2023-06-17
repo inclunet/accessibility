@@ -7,6 +7,14 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+type AccessibilityRule struct {
+	A           int
+	Description string
+	Error       bool
+	Solution    string
+	Warning     bool
+}
+
 type AccessibilityCheck struct {
 	Element     string
 	A           int
@@ -15,6 +23,7 @@ type AccessibilityCheck struct {
 	Description string
 	Html        template.HTML
 	Line        int
+	Solution    string
 	Text        string
 }
 
@@ -26,21 +35,24 @@ type Accessibility interface {
 	DeepCheck(*goquery.Selection, []AccessibilityCheck) (AccessibilityCheck, error)
 	NewAccessibilityCheck(int, string) AccessibilityCheck
 	Role() (string, bool)
+	SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck)
+	SetAccessibilityRules(accessibilityRules *map[string]AccessibilityRule)
+	SetSelection(s *goquery.Selection)
 }
 
-func GetElementInterface(elementName string) (func(*goquery.Selection, []AccessibilityCheck) Accessibility, error) {
-	checkList := map[string]func(*goquery.Selection, []AccessibilityCheck) Accessibility{
-		"a":       NewLinkCheck,
-		"amp-img": NewAmpImageCheck,
-		"button":  NewButtonCheck,
-		"h1":      NewHeaderCheck,
-		"h2":      NewHeaderCheck,
-		"h3":      NewHeaderCheck,
-		"h4":      NewHeaderCheck,
-		"h5":      NewHeaderCheck,
-		"h6":      NewHeaderCheck,
-		"input":   NewInputCheck,
-		"img":     NewImageCheck,
+func GetElementInterface(elementName string) (Accessibility, error) {
+	checkList := map[string]Accessibility{
+		"a":       &Links{},
+		"amp-img": &AmpImg{},
+		"button":  &Buttons{},
+		"h1":      &Headers{},
+		"h2":      &Headers{},
+		"h3":      &Headers{},
+		"h4":      &Headers{},
+		"h5":      &Headers{},
+		"h6":      &Headers{},
+		"input":   &Inputs{},
+		"img":     &Images{},
 	}
 
 	if elementInterface, ok := checkList[elementName]; ok {

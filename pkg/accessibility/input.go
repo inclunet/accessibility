@@ -8,6 +8,15 @@ type Inputs struct {
 	Element
 }
 
+func (i *Inputs) AccessibleText() (string, bool) {
+	switch i.getFieldType() {
+	case "submit", "reset", "button":
+		return i.Selection.Attr("value")
+	default:
+		return i.Element.AccessibleText()
+	}
+}
+
 func (i *Inputs) getFieldType() string {
 	value, ok := i.Selection.Attr("type")
 

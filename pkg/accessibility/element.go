@@ -9,6 +9,7 @@ import (
 type Element struct {
 	Selection           *goquery.Selection
 	AccessibilityChecks []AccessibilityCheck
+	AccessibilityRules  *map[string]AccessibilityRule
 }
 
 func (e *Element) AlternativeText() (string, bool) {
@@ -45,7 +46,7 @@ func (e *Element) AccessibleText() (string, bool) {
 		return accessibleText, true
 	}
 
-	if accessibleText, ok := e.Title(); ok {
+	if accessibleText, ok := e.GetTitle(); ok {
 		return accessibleText, ok
 	}
 
@@ -91,20 +92,34 @@ func (e *Element) Role() (string, bool) {
 	return "", false
 }
 
-func (e *Element) Title() (string, bool) {
+func (e *Element) GetTitle() (string, bool) {
 	if accessibleText, ok := e.Selection.Attr("title"); ok && accessibleText != "" {
 		return accessibleText, true
 	}
 	return "", false
 }
 
+func (e *Element) SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck) {
+	e.AccessibilityChecks = accessibilityChecks
+}
+
+func (e *Element) SetAccessibilityRules(accessibilityRules *map[string]AccessibilityRule) {
+	e.AccessibilityRules = accessibilityRules
+}
+
+func (e *Element) SetSelection(s *goquery.Selection) {
+	e.Selection = s
+}
+
 func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
-	elementInterface, err := GetElementInterface(goquery.NodeName(s))
+	accessibilityInterface, err := GetElementInterface(goquery.NodeName(s))
 
 	if err != nil {
 		return AccessibilityCheck{}, err
 	}
 
-	accessibilityInterface := elementInterface(s, accessibilityChecks)
+	accessibilityInterface.SetSelection(s)
+	accessibilityInterface.SetAccessibilityChecks(accessibilityChecks)
+
 	return accessibilityInterface.Check(), nil
 }
