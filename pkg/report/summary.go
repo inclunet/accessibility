@@ -23,9 +23,9 @@ func (s *AccessibilitySummary) Update(accessibilityCheck accessibility.Accessibi
 	}
 
 	if accessibilityCheck.Error {
-		s.Pass++
-	} else {
 		s.Errors++
+	} else {
+		s.Pass++
 	}
 
 	s.UpdateRat()

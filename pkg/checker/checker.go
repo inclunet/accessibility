@@ -60,8 +60,13 @@ func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport r
 // this function starts an evaluation process for all pages stored in AccessibilityChecker Struct matrix and store Accessibility Reports in a matrix to future save all process.
 // If a single page evaluation fails, this function skips and does not store report results and continue evaluation for the rest of pages.
 func (c *AccessibilityChecker) CheckAllList() {
-	var err error
 	for i, accessibilityReport := range c.Reports {
+		err := accessibilityReport.LoadAccessibilityRules("lang/" + c.Lang + "/rules.json")
+
+		if err != nil {
+			log.Printf("Is not possible to evaluate page: %s", err)
+		}
+
 		accessibilityReport, err = c.CheckPage(accessibilityReport, c.Lang, c.ReportPath)
 
 		if err != nil {

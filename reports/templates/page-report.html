@@ -73,7 +73,7 @@
                         data-bs-parent="#details">
                         <div class="card-body">
                             {{range $i, $check := $summary.Checks}}
-                            {{if eq $check.Pass false}}
+                            {{if $check.Error}}
                             <p>{{$check.Description}}</p>
                             <p>{{$check.Html}}</p>
                             <blockquote>
