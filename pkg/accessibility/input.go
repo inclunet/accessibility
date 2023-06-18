@@ -50,35 +50,32 @@ func (i *Inputs) FindLabel() bool {
 }
 
 func (i *Inputs) Check() AccessibilityCheck {
-	accessibilityCheck := i.NewAccessibilityCheck(1, "If your input field is not hidden, you need a label text description for screen reader software users.")
+	accessibilityCheck := i.NewAccessibilityCheck("pass")
 
 	if i.AriaHidden() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "aria-hidden inputs do not need text description."
-		return accessibilityCheck
+		return i.FindViolation(accessibilityCheck, "aria-hidden")
 	}
 
 	if i.isHiddenField() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Hidden fields do not need description or label"
-		return accessibilityCheck
+		return i.FindViolation(accessibilityCheck, "aria-hidden")
 	}
 
 	if i.FindLabel() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "This input has  a valid    label description text for screen readers."
-		return accessibilityCheck
+		return i.FindViolation(accessibilityCheck, "emag-6.2.1")
 	}
 
 	accessibleText, ok := i.AccessibleText()
 
-	if ok {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Short descriptions are not a good accessiblity practice for images"
+	if !ok {
+		return i.FindViolation(accessibilityCheck, "emag-6.2.1")
+	}
 
-		if len(accessibleText) > 3 {
-			accessibilityCheck.Description = "This link are providing a valid    description text for screen readers."
-		}
+	if i.CheckTooShortText(accessibleText) {
+		return i.FindViolation(accessibilityCheck, "too-short-text")
+	}
+
+	if i.CheckTooLongText(accessibleText, 120) {
+		return i.FindViolation(accessibilityCheck, "too-long-text")
 	}
 
 	return accessibilityCheck

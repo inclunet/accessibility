@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -20,6 +21,7 @@ import (
 type AccessibilityChecker struct {
 	Date       string
 	Domain     string
+	FileName   string
 	Lang       string
 	ReportPath string
 	Reports    []report.AccessibilityReport
@@ -43,7 +45,7 @@ func (c *AccessibilityChecker) AddCheckListItem(url string, reportFile string, l
 func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport report.AccessibilityReport) report.AccessibilityReport {
 	s.Each(func(i int, s *goquery.Selection) {
 
-		accessibilityCheck, err := accessibility.NewElementCheck(s, accessibilityReport.Checks)
+		accessibilityCheck, err := accessibility.NewElementCheck(s, accessibilityReport.Checks, accessibilityReport.Rules)
 
 		if err == nil {
 			accessibilityReport.AddCheck(accessibilityCheck)
@@ -282,22 +284,18 @@ func (c *AccessibilityChecker) SaveJsonReport(data any, fileName string) error {
 // Starts a new checker object and initialize checking accessibility if the informed input checklist file is available.
 // This function returns an AccessibilityChecker object and espects a yaml input file wit a checklist to a batch evaluation.
 // If the imput checklist isn't informed, this functions return an AccessibilityObject but don't check any page.
-func NewChecker(fileName string) AccessibilityChecker {
-	newChecker := AccessibilityChecker{
-		Lang:       "pt-br",
-		ReportPath: "reports",
-	}
-
-	if fileName != "" {
-		err := newChecker.LoadCheckList(fileName)
+func NewChecker(newChecker AccessibilityChecker) (AccessibilityChecker, error) {
+	if newChecker.FileName != "" {
+		err := newChecker.LoadCheckList(newChecker.FileName)
 
 		if err == nil {
 			newChecker.CheckAllList()
 			newChecker.SaveAllReports()
-		} else {
-			log.Printf("skiping load check list input file: %s", err)
+			return newChecker, nil
 		}
+
+		return newChecker, errors.New(fmt.Sprintf("skiping load check list input file: %s", err))
 	}
 
-	return newChecker
+	return newChecker, nil
 }

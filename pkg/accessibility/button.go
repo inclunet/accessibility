@@ -5,29 +5,28 @@ type Buttons struct {
 }
 
 func (b *Buttons) Check() AccessibilityCheck {
-	accessibilityCheck := b.NewAccessibilityCheck(1, "Hidden buttons do not need accessibility description.")
-	accessibilityCheck.Pass = true
+	accessibilityCheck := b.NewAccessibilityCheck("pass")
 
-	if !b.AriaHidden() {
-		accessibilityCheck.Pass = false
-		accessibilityCheck.Description = "No hidden buttons needs a accessible description text to screen readers"
-		accessibleText, ok := b.AccessibleText()
+	if b.AriaHidden() {
+		return b.FindViolation(accessibilityCheck, "aria-hidden")
+	}
 
-		if !ok {
-			accessibilityCheck, err := b.DeepCheck(b.Selection.Children(), b.AccessibilityChecks)
-			if err == nil {
-				return accessibilityCheck
-			}
+	accessibleText, ok := b.AccessibleText()
+
+	if !ok {
+		if accessibilityCheck, err := b.DeepCheck(b.Selection.Children(), b.AccessibilityChecks, b.AccessibilityRules); err == nil {
+			return accessibilityCheck
 		}
 
-		if ok {
-			accessibilityCheck.Pass = true
-			accessibilityCheck.Description = "Short descriptions do not provid good information to blind people."
+		return b.FindViolation(accessibilityCheck, "emag-6.1.1")
+	}
 
-			if len(accessibleText) > 3 {
-				accessibilityCheck.Description = "This button are providing a valid    description text for screen readers."
-			}
-		}
+	if b.CheckTooShortText(accessibleText) {
+		return b.FindViolation(accessibilityCheck, "too-short-text")
+	}
+
+	if b.CheckTooLongText(accessibleText, 120) {
+		return b.FindViolation(accessibilityCheck, "too-long-text")
 	}
 
 	return accessibilityCheck

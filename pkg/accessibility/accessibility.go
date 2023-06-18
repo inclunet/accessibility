@@ -18,7 +18,7 @@ type AccessibilityRule struct {
 type AccessibilityCheck struct {
 	Element     string
 	A           int
-	Pass        bool
+	Error       bool
 	Warning     bool
 	Description string
 	Html        template.HTML
@@ -32,27 +32,27 @@ type Accessibility interface {
 	AriaHidden() bool
 	AriaLabel() (string, bool)
 	Check() AccessibilityCheck
-	DeepCheck(*goquery.Selection, []AccessibilityCheck) (AccessibilityCheck, error)
-	NewAccessibilityCheck(int, string) AccessibilityCheck
+	DeepCheck(*goquery.Selection, []AccessibilityCheck, map[string]AccessibilityRule) (AccessibilityCheck, error)
+	NewAccessibilityCheck(string) AccessibilityCheck
 	Role() (string, bool)
 	SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck)
-	SetAccessibilityRules(accessibilityRules *map[string]AccessibilityRule)
+	SetAccessibilityRules(accessibilityRules map[string]AccessibilityRule)
 	SetSelection(s *goquery.Selection)
 }
 
 func GetElementInterface(elementName string) (Accessibility, error) {
 	checkList := map[string]Accessibility{
-		"a":       &Links{},
-		"amp-img": &AmpImg{},
-		"button":  &Buttons{},
-		"h1":      &Headers{},
-		"h2":      &Headers{},
-		"h3":      &Headers{},
-		"h4":      &Headers{},
-		"h5":      &Headers{},
-		"h6":      &Headers{},
-		"input":   &Inputs{},
-		"img":     &Images{},
+		"a": &Links{},
+		//"amp-img": &AmpImg{},
+		"button": &Buttons{},
+		"h1":     &Headers{},
+		"h2":     &Headers{},
+		"h3":     &Headers{},
+		"h4":     &Headers{},
+		"h5":     &Headers{},
+		"h6":     &Headers{},
+		"input":  &Inputs{},
+		"img":    &Images{},
 	}
 
 	if elementInterface, ok := checkList[elementName]; ok {

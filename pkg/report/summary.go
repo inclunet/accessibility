@@ -22,7 +22,7 @@ func (s *AccessibilitySummary) Update(accessibilityCheck accessibility.Accessibi
 		s.Warnings++
 	}
 
-	if accessibilityCheck.Pass {
+	if accessibilityCheck.Error {
 		s.Pass++
 	} else {
 		s.Errors++

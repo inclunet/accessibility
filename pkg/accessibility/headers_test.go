@@ -1,6 +1,8 @@
 package accessibility
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestHeaders_isIncorrectLevel(t *testing.T) {
 	type args struct {

@@ -1,0 +1,100 @@
+{
+    "pass": {
+        "a": 0,
+        "error": false,
+        "warning": false,
+        "description": "Correto!",
+        "solution": "Continue assim."
+    },
+    "aria-hidden": {
+        "a": 0,
+        "error": false,
+        "warning": true,
+        "description": "Elementos com o atributo aria-hidden não precisam de descrição.",
+        "solution": "Verifique se este elemento não está ocultando alguma informação útil para usuários de software leitor de telas."
+    },
+    "too-short-text": {
+        "a": 1,
+        "error": false,
+        "warning": true,
+        "description": "O texto do elemento é muito curto e pode não ser útil",
+        "solution": "Se isto for uma sigla use o elemento <abr> com o atributo title para descrever apropriadamente o significado."
+    },
+    "too-long-text": {
+        "a": 1,
+        "error": false,
+        "warning": true,
+        "description": "O conteúdo textual é muito longo para este tipo de elemento",
+        "solution": "Use textos menores para este tipo de elemento, aparentemente você não está usando o elemento semãntico correto."
+    },
+    "emag-1.2.2": {
+        "a": 1,
+        "error": false,
+        "warning": true,
+        "description": "Presença de tags HTML sem atributo e conteúdo de texto",
+        "solution": "Verificar a presença de tags HTML que apresentem inicio e fechamento, mas sem conteúdo de texto. Possível exemplo seria <a></a> ou <div></div>."
+    },
+    "emag-1.2.3": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Presença de tags HTML sem atributo e conteúdo de texto",
+        "solution": "Verificar a presença de tags HTML (<h1>, <h2>, <h3>, <h4>, <h5>, <h6>, <a>, <p>, <label>) que apresentem inicio e fechamento, mas sem conteúdo de texto. Possível exemplo seria <a></a> ou <div></div>."
+    },
+    "emag-1.3.1": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Os niveis de título não foram utilizados.",
+        "solution": "Verificar a ausência dos níveis de cabeçalho (<h1>, <h2>, <h3>, <h4>, <h5> e <h6>) nas páginas HTML."
+    },
+    "emag-1.3.2": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "A hierarquia dos níveis de título está incorreta.",
+        "solution": "Verifique a ordem sequencial da presença de hierarquia nos níveis dos cabeçalhos. Por exemplo: a presença de um cabeçalho de nível <h3> depende da existência de um cabeçalho de nível <h2> antes dele."
+    },
+    "emag-1.3.4": {
+        "a": 1,
+        "error": false,
+        "warning": true,
+        "description": "Nesta página foi utilizado somente o título de nível H1",
+        "solution": "Verifique a presença de apenas um nível de cabeçalho <h1> sem categorizar outros assuntos presentes na página em níveis de cabeçalho."
+    },
+    "emag-1.3.6": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Mais de 1 cabeçalho de nível h1 estão presentes nesta página",
+        "solution": "Verifique a presença de vários cabeçalhos de nível <h1> sendo utilizados nesta página."
+    },
+    "emag-3.5.3": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Links vazios",
+        "solution": "Presença do elemento <a> e ausência de texto descritivo."
+    },
+    "emag-3.6.2": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Imagens com conteúdo sem descrição",
+        "solution": "Presença de elementos <img> e ausência de conteúdo descritivo do atributo <alt>."
+    },
+    "emag-6.1.1": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Botão sem descrição",
+        "solution": "Presença do elemento <input> com o conteúdo do atributo type igual a image e ausência de conteúdo no atributo alt ou ausência do alt. Presença do elemento <input> com os conteúdos: button, reset, ou submit e ausência de conteúdo no atributo value ou ausência do atributo value."
+    },
+    "emag-6.2.1": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Campo sem label associado",
+        "solution": "Presença do elemento <input> e ausência de elemento <label> com atributo for referenciado ao atributo id do <input>, ou presença de elemento <input> sem estar dentro de elemento <label>."
+    }
+}

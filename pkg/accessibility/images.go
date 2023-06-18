@@ -5,21 +5,24 @@ type Images struct {
 }
 
 func (i *Images) Check() AccessibilityCheck {
-	accessibilityCheck := i.NewAccessibilityCheck(1, "No aria-hidden images needs a valid accessibility text description.")
+	accessibilityCheck := i.NewAccessibilityCheck("pass")
 
 	if i.AriaHidden() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Aria-hidden images do not need a valid accessibility text description"
-		return accessibilityCheck
+		return i.FindViolation(accessibilityCheck, "aria-hidden")
 	}
 
-	if accessibleText, ok := i.AccessibleText(); ok {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Please verify if your image has a good description"
+	accessibleText, ok := i.AccessibleText()
 
-		if len(accessibleText) >= 3 {
-			accessibilityCheck.Description = "This image contains a good descriptiion"
-		}
+	if !ok {
+		return i.FindViolation(accessibilityCheck, "emag-3.6.2")
+	}
+
+	if i.CheckTooShortText(accessibleText) {
+		return i.FindViolation(accessibilityCheck, "too-short-text")
+	}
+
+	if i.CheckTooLongText(accessibleText, 240) {
+		return i.FindViolation(accessibilityCheck, "too-long-text")
 	}
 
 	return accessibilityCheck

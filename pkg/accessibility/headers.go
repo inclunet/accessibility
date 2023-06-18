@@ -38,40 +38,39 @@ func (h *Headers) CheckHierarchy(accessibilityCheck AccessibilityCheck) bool {
 	for _, accessibilityCheck := range accessibilityChecks {
 		if currentLevel, ok := h.GetHeaderLevel(accessibilityCheck); ok {
 			if h.isIncorrectLevel(headerLevel, currentLevel) {
-				return false
+				return true
 			}
 
 			headerLevel = currentLevel
 		}
 	}
 
-	return true
+	return false
 }
 
 func (h *Headers) Check() AccessibilityCheck {
-	accessibilityCheck := h.NewAccessibilityCheck(1, "Please check if this header is following the headers hierarchy")
+	accessibilityCheck := h.NewAccessibilityCheck("pass")
 
 	if h.AriaHidden() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Aria-hidden headers do not need to follow ierarchi or needs a accessibility text description"
-		return accessibilityCheck
+		return h.FindViolation(accessibilityCheck, "aria-hidden")
 	}
 
 	if h.CheckHierarchy(accessibilityCheck) {
-		accessibilityCheck.Description = "This header is following correct ierarchi but do not have a text description"
+		return h.FindViolation(accessibilityCheck, "emag-1.3.2")
+	}
 
-		if accessibleText, ok := h.AccessibleText(); ok {
-			accessibilityCheck.Pass = true
-			accessibilityCheck.Description = "This header are ok"
+	accessibleText, ok := h.AccessibleText()
 
-			if h.CheckTooShortText(accessibleText) {
-				accessibilityCheck.Description = "Small headers can not provide information to screen readers"
-			}
+	if !ok {
+		return h.FindViolation(accessibilityCheck, "emag-1.2.3")
+	}
 
-			if h.CheckTooLongText(accessibleText, 80) {
-				accessibilityCheck.Description = "Please check if this header is too longh, too long headers is not presented at a single line and is possibly a bad practice."
-			}
-		}
+	if h.CheckTooShortText(accessibleText) {
+		return h.FindViolation(accessibilityCheck, "too-short-text")
+	}
+
+	if h.CheckTooLongText(accessibleText, 80) {
+		return h.FindViolation(accessibilityCheck, "too-long-text")
 	}
 
 	return accessibilityCheck
