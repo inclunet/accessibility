@@ -30,7 +30,7 @@ func main() {
 	}
 
 	evaluator.GetDomainName(url)
-	evaluator.AddCheckListItem(url, reportFile, lang, reportPath)
+	evaluator.AddCheckListItem(url, reportFile)
 	evaluator.CheckAllList()
 	evaluator.SaveAllReports()
 }

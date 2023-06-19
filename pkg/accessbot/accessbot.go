@@ -45,12 +45,20 @@ func (a *AccessBot) LoadUsers() error {
 func (a *AccessBot) MessageHandler(c telebot.Context) error {
 	url := c.Text()
 	if strings.HasPrefix(url, "http") {
-		evaluator := checker.NewChecker("")
-		evaluator.AddCheckListItem(url, "pagina", evaluator.Lang, evaluator.ReportPath)
+		evaluator, err := checker.NewChecker(checker.AccessibilityChecker{
+			Lang:       c.Sender().LanguageCode,
+			ReportPath: "reports",
+		})
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		evaluator.GetDomainName(url)
+		evaluator.AddCheckListItem(url, "pagina")
 		evaluator.CheckAllList()
 		evaluator.SaveAllReports()
 		for _, accessibilityReport := range evaluator.Reports {
-
 			reportFile := &telebot.Document{
 				File:     telebot.FromDisk(accessibilityReport.HtmlReportPath),
 				MIME:     "text/html",

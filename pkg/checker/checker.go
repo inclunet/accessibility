@@ -29,10 +29,8 @@ type AccessibilityChecker struct {
 
 // this function store a new checklist entry for manual single checks requested be command line parameters.
 // It is necessary for some situations like input checklist file is not provided by user and an example is available in main.go file.
-func (c *AccessibilityChecker) AddCheckListItem(url string, reportFile string, lang string, reportPath string) {
+func (c *AccessibilityChecker) AddCheckListItem(url string, reportFile string) {
 	if url != "" && reportFile != "" {
-		c.Lang = lang
-		c.ReportPath = reportPath
 		newReport := report.AccessibilityReport{
 			Domain:     c.GetDomainName(url),
 			Url:        url,
