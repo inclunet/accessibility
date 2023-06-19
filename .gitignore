@@ -19,6 +19,3 @@ vendor/
 
 # Exclude report files.
 reports/**/*.*
-
-# Exclude user log file.
-users.json
