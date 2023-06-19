@@ -18,4 +18,7 @@ vendor/
 .vscode/
 
 # Exclude report files.
-report.html
+reports/**/*.*
+
+# Exclude user log file.
+users.json
