@@ -12,8 +12,9 @@ import (
 )
 
 type AccessBot struct {
-	Bot   *telebot.Bot
-	Users map[int64]*telebot.User
+	Bot        *telebot.Bot
+	ReportPath string
+	Users      map[int64]*telebot.User
 }
 
 func (a *AccessBot) Handle() {
@@ -28,7 +29,7 @@ func (a *AccessBot) HelpAndler(c telebot.Context) error {
 }
 
 func (a *AccessBot) LoadUsers() error {
-	file, err := os.ReadFile("users.json")
+	file, err := os.ReadFile(a.ReportPath + "/users.json")
 
 	if err != nil {
 		return err
@@ -47,7 +48,7 @@ func (a *AccessBot) MessageHandler(c telebot.Context) error {
 	if strings.HasPrefix(url, "http") {
 		evaluator, err := checker.NewChecker(checker.AccessibilityChecker{
 			Lang:       c.Sender().LanguageCode,
-			ReportPath: "reports",
+			ReportPath: a.ReportPath,
 		})
 
 		if err != nil {
@@ -90,7 +91,7 @@ func (a *AccessBot) SaveUsers(user *telebot.User) error {
 	if !ok {
 		a.Users[user.ID] = user
 
-		file, err := os.Create("users.json")
+		file, err := os.Create(a.ReportPath + "users.json")
 
 		if err != nil {
 			return err
@@ -114,7 +115,7 @@ func (a *AccessBot) SaveUsers(user *telebot.User) error {
 	return nil
 }
 
-func New(token string) (AccessBot, error) {
+func New(token string, reportPath string) (AccessBot, error) {
 	newAccessBot := AccessBot{}
 
 	config := telebot.Settings{
@@ -129,6 +130,7 @@ func New(token string) (AccessBot, error) {
 	}
 
 	newAccessBot.Bot = bot
+	newAccessBot.ReportPath = reportPath
 	newAccessBot.Users = make(map[int64]*telebot.User)
 	err = newAccessBot.LoadUsers()
 
