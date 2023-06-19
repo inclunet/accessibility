@@ -11,7 +11,7 @@ func main() {
 	log.Println("Starting accessibility checker bot service...")
 	token := os.Getenv("TELEGRAM_TOKEN")
 
-	bot, err := accessbot.New(token)
+	bot, err := accessbot.New(token, "reports")
 
 	if err != nil {
 		log.Println(err)

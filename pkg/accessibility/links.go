@@ -1,47 +1,33 @@
 package accessibility
 
-import (
-	"github.com/PuerkitoBio/goquery"
-)
-
 type Links struct {
 	Element
 }
 
 func (l *Links) Check() AccessibilityCheck {
-	accessibilityCheck := l.NewAccessibilityCheck(1, "no hidden links needs a accessible text description for screen reader software.")
+	accessibilityCheck := l.NewAccessibilityCheck("pass")
 
 	if l.AriaHidden() {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Hidden Links do not need an accessible text description for screen readers"
-		return accessibilityCheck
+		return l.FindViolation(accessibilityCheck, "aria-hidden")
 	}
 
 	accessibleText, ok := l.AccessibleText()
 
 	if !ok {
-		accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks)
-
-		if err == nil {
+		if accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks, l.AccessibilityRules); err == nil {
 			return accessibilityCheck
 		}
+
+		return l.FindViolation(accessibilityCheck, "emag-3.5.3")
 	}
 
-	if ok {
-		accessibilityCheck.Pass = true
-		accessibilityCheck.Description = "Short alternative text       do not provide good for screen readers."
+	if l.CheckTooShortText(accessibleText) {
+		return l.FindViolation(accessibilityCheck, "too-short-text")
+	}
 
-		if len(accessibleText) > 3 {
-			accessibilityCheck.Description = "This link are providing a valid    description text for screen readers."
-		}
+	if l.CheckTooLongText(accessibleText, 200) {
+		return l.FindViolation(accessibilityCheck, "too-long-text")
 	}
 
 	return accessibilityCheck
-}
-
-func NewLinkCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) Accessibility {
-	accessibilityInterface := new(Links)
-	accessibilityInterface.Selection = s
-	accessibilityInterface.AccessibilityChecks = accessibilityChecks
-	return accessibilityInterface
 }
