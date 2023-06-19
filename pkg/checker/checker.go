@@ -195,7 +195,7 @@ func (c *AccessibilityChecker) SaveAllReports() {
 	var err error
 	for i, accessibilityReport := range c.Reports {
 		log.Printf("saving report file #%d for %s", i, accessibilityReport.ReportFile)
-		accessibilityReport.HtmlReportPath, accessibilityReport.JsonReportPath, err = c.Save(accessibilityReport, accessibilityReport.ReportFile, "page-report.html")
+		accessibilityReport, err = c.Save(accessibilityReport, c.Lang)
 
 		if err != nil {
 			log.Printf("is not possible to save report data: %s", err)
@@ -207,37 +207,37 @@ func (c *AccessibilityChecker) SaveAllReports() {
 
 // Save HTML and JSON report files.
 // tis function requires any struct and a template filename to construct reporte files and returns an error if this operation fails.
-func (c *AccessibilityChecker) Save(data any, reportFile string, templateFile string) (string, string, error) {
+func (c *AccessibilityChecker) Save(accessibilityReport report.AccessibilityReport, lang string) (report.AccessibilityReport, error) {
 	reportPath, err := c.getReportPath()
 
 	if err != nil {
-		return "", "", err
+		return accessibilityReport, err
 	}
 
-	htmlReportPath := reportPath + "/html/" + reportFile + ".html"
+	accessibilityReport.HtmlReportPath = reportPath + "/html/" + accessibilityReport.ReportFile + ".html"
 
-	err = c.SaveHtmlReport(data, htmlReportPath, c.ReportPath+"/templates/"+templateFile)
+	err = c.SaveHtmlReport(accessibilityReport, lang)
 
 	if err != nil {
-		return "", "", err
+		return accessibilityReport, err
 	}
 
-	jsonReportPath := reportPath + "/json/" + reportFile + ".json"
+	accessibilityReport.JsonReportPath = reportPath + "/json/" + accessibilityReport.ReportFile + ".json"
 
-	err = c.SaveJsonReport(data, jsonReportPath)
+	err = c.SaveJsonReport(accessibilityReport)
 
 	if err != nil {
-		return htmlReportPath, "", err
+		return accessibilityReport, err
 	}
 
-	return htmlReportPath, jsonReportPath, nil
+	return accessibilityReport, nil
 }
 
 // Save a HTML file from a global or individual page report struct.
 // This function Requires any struct, a path address to save html report and a template file to construct the html report files.
 // if is not possible to save html report file on disk, this function returns an error to inform.
-func (c *AccessibilityChecker) SaveHtmlReport(data any, fileName string, templateFileName string) error {
-	File, err := os.Create(fileName)
+func (c *AccessibilityChecker) SaveHtmlReport(accessibilityReport report.AccessibilityReport, lang string) error {
+	File, err := os.Create(accessibilityReport.HtmlReportPath)
 
 	if err != nil {
 		return err
@@ -245,13 +245,13 @@ func (c *AccessibilityChecker) SaveHtmlReport(data any, fileName string, templat
 
 	defer File.Close()
 
-	newTemplate := template.Must(template.ParseFiles(templateFileName))
+	newTemplate := template.Must(template.ParseFiles("lang/" + lang + "/report.html"))
 
 	if err != nil {
 		return err
 	}
 
-	err = newTemplate.Execute(File, data)
+	err = newTemplate.Execute(File, accessibilityReport)
 
 	if err != nil {
 		return err
@@ -262,8 +262,8 @@ func (c *AccessibilityChecker) SaveHtmlReport(data any, fileName string, templat
 
 // Save a json file from a global report or a page report struct.
 // This function requires a struct and a path address to save json report file and returns an error if is not possible to save a json report on disk.
-func (c *AccessibilityChecker) SaveJsonReport(data any, fileName string) error {
-	File, err := os.Create(fileName)
+func (c *AccessibilityChecker) SaveJsonReport(accessibilityReport report.AccessibilityReport) error {
+	File, err := os.Create(accessibilityReport.JsonReportPath)
 
 	if err != nil {
 		return err
@@ -271,7 +271,7 @@ func (c *AccessibilityChecker) SaveJsonReport(data any, fileName string) error {
 
 	defer File.Close()
 
-	jsonContent, err := json.Marshal(data)
+	jsonContent, err := json.Marshal(accessibilityReport)
 
 	if err != nil {
 		return err
@@ -299,7 +299,7 @@ func NewChecker(newChecker AccessibilityChecker) (AccessibilityChecker, error) {
 			return newChecker, nil
 		}
 
-		return newChecker, errors.New(fmt.Sprintf("skiping load check list input file: %s", err))
+		return newChecker, fmt.Errorf("skiping load check list input file: %w", err)
 	}
 
 	return newChecker, nil
