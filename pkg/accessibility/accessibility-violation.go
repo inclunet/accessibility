@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type AccessibilityRule struct {
+type AccessibilityViolation struct {
 	A           int
 	Description string
 	Error       bool
@@ -13,8 +13,8 @@ type AccessibilityRule struct {
 	Warning     bool
 }
 
-func LoadAccessibilityRules(filename string) (map[string]AccessibilityRule, error) {
-	accessibilityRules := make(map[string]AccessibilityRule)
+func LoadAccessibilityViolations(filename string) (map[string]AccessibilityViolation, error) {
+	accessibilityRules := make(map[string]AccessibilityViolation)
 	accessibilityRulesFile, err := os.ReadFile(filename)
 
 	if err != nil {

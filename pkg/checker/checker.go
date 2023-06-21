@@ -61,7 +61,7 @@ func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport r
 
 func (c *AccessibilityChecker) FindAllViolations() {
 	log.Println("Creating a detailed report...")
-	accessibilityViolations, err := accessibility.LoadAccessibilityRules("lang/" + c.Lang + "/rules.json")
+	accessibilityViolations, err := accessibility.LoadAccessibilityViolations("lang/" + c.Lang + "/rules.json")
 
 	if err != nil {
 		log.Fatal(err)

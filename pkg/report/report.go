@@ -23,7 +23,7 @@ func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.Accessib
 	r.Checks = append(r.Checks, r.GetLineNumber(accessibilityCheck))
 }
 
-func (r *AccessibilityReport) FindViolation(accessibilityViolations map[string]accessibility.AccessibilityRule, accessibilityCheck accessibility.AccessibilityCheck) accessibility.AccessibilityCheck {
+func (r *AccessibilityReport) FindViolation(accessibilityViolations map[string]accessibility.AccessibilityViolation, accessibilityCheck accessibility.AccessibilityCheck) accessibility.AccessibilityCheck {
 	if accessibilityViolation, ok := accessibilityViolations[accessibilityCheck.Violation]; ok {
 		accessibilityCheck.A = accessibilityViolation.A
 		accessibilityCheck.Description = accessibilityViolation.Description
@@ -35,7 +35,7 @@ func (r *AccessibilityReport) FindViolation(accessibilityViolations map[string]a
 	return accessibilityCheck
 }
 
-func (r *AccessibilityReport) FindViolations(accessibilityViolations map[string]accessibility.AccessibilityRule) {
+func (r *AccessibilityReport) FindViolations(accessibilityViolations map[string]accessibility.AccessibilityViolation) {
 	for i, accessibilityCheck := range r.Checks {
 		r.Checks[i] = r.FindViolation(accessibilityViolations, accessibilityCheck)
 	}
