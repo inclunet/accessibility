@@ -2,42 +2,38 @@ package accessibility
 
 import (
 	"errors"
-	"html/template"
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-type AccessibilityRule struct {
-	A           int
-	Description string
-	Error       bool
-	Solution    string
-	Warning     bool
-}
-
-type AccessibilityCheck struct {
-	Element     string
-	A           int
-	Error       bool
-	Warning     bool
-	Description string
-	Html        template.HTML
-	Line        int
-	Solution    string
-	Text        string
-}
 
 type Accessibility interface {
 	AlternativeText() (string, bool)
 	AriaHidden() bool
 	AriaLabel() (string, bool)
 	Check() AccessibilityCheck
-	DeepCheck(*goquery.Selection, []AccessibilityCheck, map[string]AccessibilityRule) (AccessibilityCheck, error)
+	DeepCheck(*goquery.Selection, []AccessibilityCheck) (AccessibilityCheck, error)
 	NewAccessibilityCheck(string) AccessibilityCheck
 	Role() (string, bool)
 	SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck)
-	SetAccessibilityRules(accessibilityRules map[string]AccessibilityRule)
 	SetSelection(s *goquery.Selection)
+}
+
+func AfterCheck(accessibilityChecks []AccessibilityCheck) []AccessibilityCheck {
+	newChecks := []AccessibilityCheck{}
+
+	if HeaderUnavailable(accessibilityChecks) {
+		newChecks = append(newChecks, NewAccessibilityCheck("h1", "", "emag-1.3.1"))
+	}
+
+	if HeaderInvalidOrdenation(accessibilityChecks) {
+		newChecks = append(newChecks, NewAccessibilityCheck("h2", "", "emag-1.3.3"))
+	}
+
+	if HeaderMainUnavailable(accessibilityChecks) {
+		newChecks = append(newChecks, NewAccessibilityCheck("h1", "", "emag-1.3.4"))
+	}
+
+	return newChecks
 }
 
 func GetElementInterface(elementName string) (Accessibility, error) {

@@ -53,29 +53,29 @@ func (i *Inputs) Check() AccessibilityCheck {
 	accessibilityCheck := i.NewAccessibilityCheck("pass")
 
 	if i.AriaHidden() {
-		return i.FindViolation(accessibilityCheck, "aria-hidden")
+		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
 	if i.isHiddenField() {
-		return i.FindViolation(accessibilityCheck, "aria-hidden")
+		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
 	if i.FindLabel() {
-		return i.FindViolation(accessibilityCheck, "emag-6.2.1")
+		return accessibilityCheck.SetViolation("emag-6.2.1")
 	}
 
 	accessibleText, ok := i.AccessibleText()
 
 	if !ok {
-		return i.FindViolation(accessibilityCheck, "emag-6.2.1")
+		return accessibilityCheck.SetViolation("emag-6.2.1")
 	}
 
 	if i.CheckTooShortText(accessibleText) {
-		return i.FindViolation(accessibilityCheck, "too-short-text")
+		return accessibilityCheck.SetViolation("too-short-text")
 	}
 
 	if i.CheckTooLongText(accessibleText, 120) {
-		return i.FindViolation(accessibilityCheck, "too-long-text")
+		return accessibilityCheck.SetViolation("too-long-text")
 	}
 
 	return accessibilityCheck

@@ -8,25 +8,25 @@ func (l *Links) Check() AccessibilityCheck {
 	accessibilityCheck := l.NewAccessibilityCheck("pass")
 
 	if l.AriaHidden() {
-		return l.FindViolation(accessibilityCheck, "aria-hidden")
+		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
 	accessibleText, ok := l.AccessibleText()
 
 	if !ok {
-		if accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks, l.AccessibilityRules); err == nil {
+		if accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks); err == nil {
 			return accessibilityCheck
 		}
 
-		return l.FindViolation(accessibilityCheck, "emag-3.5.3")
+		return accessibilityCheck.SetViolation("emag-3.5.3")
 	}
 
 	if l.CheckTooShortText(accessibleText) {
-		return l.FindViolation(accessibilityCheck, "too-short-text")
+		return accessibilityCheck.SetViolation("too-short-text")
 	}
 
 	if l.CheckTooLongText(accessibleText, 200) {
-		return l.FindViolation(accessibilityCheck, "too-long-text")
+		return accessibilityCheck.SetViolation("too-long-text")
 	}
 
 	return accessibilityCheck

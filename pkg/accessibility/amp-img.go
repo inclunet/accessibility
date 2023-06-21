@@ -5,15 +5,15 @@ type AmpImg struct {
 }
 
 func (a *AmpImg) Check() AccessibilityCheck {
-	AccessibilityCheck := a.Images.Check()
+	accessibilityCheck := a.Images.Check()
 
-	if AccessibilityCheck.Error {
-		if accessibilityCheck, err := a.DeepCheck(a.Selection.Children(), a.AccessibilityChecks, a.AccessibilityRules); err == nil {
+	if accessibilityCheck.Error {
+		if accessibilityCheck, err := a.DeepCheck(a.Selection.Children(), a.AccessibilityChecks); err == nil {
 			return accessibilityCheck
 		}
 
-		return a.FindViolation(AccessibilityCheck, "emag-3.6.2")
+		return accessibilityCheck.SetViolation("emag-3.6.2")
 	}
 
-	return AccessibilityCheck
+	return accessibilityCheck
 }

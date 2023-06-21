@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -29,21 +28,26 @@ type AccessibilityChecker struct {
 
 // this function store a new checklist entry for manual single checks requested be command line parameters.
 // It is necessary for some situations like input checklist file is not provided by user and an example is available in main.go file.
-func (c *AccessibilityChecker) AddCheckListItem(url string, reportFile string) {
-	if url != "" && reportFile != "" {
-		newReport := report.AccessibilityReport{
-			Domain:     c.GetDomainName(url),
-			Url:        url,
-			ReportFile: reportFile,
-		}
-		c.Reports = append(c.Reports, newReport)
+func (c *AccessibilityChecker) AddCheckListItem(accessibilityReport report.AccessibilityReport) {
+	accessibilityReport.Domain = c.GetDomainName(accessibilityReport.Url)
+	if accessibilityReport.Url != "" && accessibilityReport.ReportFile != "" {
+
+		c.Reports = append(c.Reports, accessibilityReport)
 	}
+}
+
+func (c *AccessibilityChecker) AfterCheck(accessibilityReport report.AccessibilityReport) report.AccessibilityReport {
+	for _, accessibilityCheck := range accessibility.AfterCheck(accessibilityReport.Checks) {
+		accessibilityReport.AddCheck(accessibilityCheck)
+	}
+
+	return accessibilityReport
 }
 
 func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport report.AccessibilityReport) report.AccessibilityReport {
 	s.Each(func(i int, s *goquery.Selection) {
 
-		accessibilityCheck, err := accessibility.NewElementCheck(s, accessibilityReport.Checks, accessibilityReport.Rules)
+		accessibilityCheck, err := accessibility.NewElementCheck(s, accessibilityReport.Checks)
 
 		if err == nil {
 			accessibilityReport.AddCheck(accessibilityCheck)
@@ -55,17 +59,26 @@ func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport r
 	return accessibilityReport
 }
 
+func (c *AccessibilityChecker) FindAllViolations() {
+	log.Println("Creating a detailed report...")
+	accessibilityViolations, err := accessibility.LoadAccessibilityViolations("lang/" + c.Lang + "/rules.json")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, accessibilityReport := range c.Reports {
+		accessibilityReport.FindViolations(accessibilityViolations)
+		c.Reports[i] = accessibilityReport
+	}
+}
+
 // this function starts an evaluation process for all pages stored in AccessibilityChecker Struct matrix and store Accessibility Reports in a matrix to future save all process.
 // If a single page evaluation fails, this function skips and does not store report results and continue evaluation for the rest of pages.
-func (c *AccessibilityChecker) CheckAllList() {
+func (c *AccessibilityChecker) CheckAllPages() {
+	var err error
 	for i, accessibilityReport := range c.Reports {
-		err := accessibilityReport.LoadAccessibilityRules("lang/" + c.Lang + "/rules.json")
-
-		if err != nil {
-			log.Printf("Is not possible to evaluate page: %s", err)
-		}
-
-		accessibilityReport, err = c.CheckPage(accessibilityReport, c.Lang, c.ReportPath)
+		accessibilityReport, err = c.CheckPage(accessibilityReport)
 
 		if err != nil {
 			log.Printf("Is not possible to evaluate page: %s", err)
@@ -77,7 +90,8 @@ func (c *AccessibilityChecker) CheckAllList() {
 
 // this function starts a single page evaluation process and returns an AccessibilityReport Struct results.
 // if the evaluation process fails, this ffunction skip evaluation and return an error to logger.
-func (c *AccessibilityChecker) CheckPage(accessibilityReport report.AccessibilityReport, lang string, reportPath string) (report.AccessibilityReport, error) {
+func (c *AccessibilityChecker) CheckPage(accessibilityReport report.AccessibilityReport) (report.AccessibilityReport, error) {
+
 	log.Printf("Starting page evaluation process for %s", accessibilityReport.Url)
 	document, html, err := c.GetPage(accessibilityReport.Url)
 
@@ -88,11 +102,18 @@ func (c *AccessibilityChecker) CheckPage(accessibilityReport report.Accessibilit
 	accessibilityReport.Html = html
 	accessibilityReport.Title = document.Find("head title").Text()
 	log.Printf("Evaluating page with title: %s", accessibilityReport.Title)
-	accessibilityReport.NewSummary()
 	accessibilityReport = c.Check(document.Find("html"), accessibilityReport)
+	accessibilityReport = c.AfterCheck(accessibilityReport)
 	log.Println("evaluation process finished.")
-
 	return accessibilityReport, nil
+}
+
+func (c *AccessibilityChecker) GenerateAllSummaries() {
+	log.Println("Generating report summaries...")
+	for i, accessibilityReport := range c.Reports {
+		accessibilityReport.GenerateSummary()
+		c.Reports[i] = accessibilityReport
+	}
 }
 
 // Get domain name from a given url to use from command line interface
@@ -287,18 +308,20 @@ func (c *AccessibilityChecker) SaveJsonReport(accessibilityReport report.Accessi
 // Starts a new checker object and initialize checking accessibility if the informed input checklist file is available.
 // This function returns an AccessibilityChecker object and espects a yaml input file wit a checklist to a batch evaluation.
 // If the imput checklist isn't informed, this functions return an AccessibilityObject but don't check any page.
-func NewChecker(newChecker AccessibilityChecker) (AccessibilityChecker, error) {
+func NewChecker(newChecker AccessibilityChecker, accessibilityReport report.AccessibilityReport) AccessibilityChecker {
 	if newChecker.FileName != "" {
 		err := newChecker.LoadCheckList(newChecker.FileName)
 
-		if err == nil {
-			newChecker.CheckAllList()
-			newChecker.SaveAllReports()
-			return newChecker, nil
+		if err != nil {
+			log.Println(err)
 		}
-
-		return newChecker, fmt.Errorf("skiping load check list input file: %w", err)
 	}
 
-	return newChecker, nil
+	newChecker.AddCheckListItem(accessibilityReport)
+	newChecker.CheckAllPages()
+	newChecker.FindAllViolations()
+	newChecker.GenerateAllSummaries()
+	newChecker.SaveAllReports()
+
+	return newChecker
 }

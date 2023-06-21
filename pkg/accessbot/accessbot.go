@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/inclunet/accessibility/pkg/checker"
+	"github.com/inclunet/accessibility/pkg/report"
 	"gopkg.in/telebot.v3"
 )
 
@@ -46,19 +47,19 @@ func (a *AccessBot) LoadUsers() error {
 func (a *AccessBot) MessageHandler(c telebot.Context) error {
 	url := c.Text()
 	if strings.HasPrefix(url, "http") {
-		evaluator, err := checker.NewChecker(checker.AccessibilityChecker{
-			Lang:       c.Sender().LanguageCode,
-			ReportPath: a.ReportPath,
-		})
 
-		if err != nil {
-			log.Println(err)
+		accessibilityReport := report.AccessibilityReport{
+			Url:        url,
+			ReportFile: "pagina",
 		}
 
-		evaluator.GetDomainName(url)
-		evaluator.AddCheckListItem(url, "pagina")
-		evaluator.CheckAllList()
-		evaluator.SaveAllReports()
+		evaluator := checker.AccessibilityChecker{
+			Lang:       c.Sender().LanguageCode,
+			ReportPath: a.ReportPath,
+		}
+
+		evaluator = checker.NewChecker(evaluator, accessibilityReport)
+
 		for _, accessibilityReport := range evaluator.Reports {
 			reportFile := &telebot.Document{
 				File:     telebot.FromDisk(accessibilityReport.HtmlReportPath),

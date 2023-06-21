@@ -1,9 +1,7 @@
 package report
 
 import (
-	"encoding/json"
 	"html"
-	"os"
 	"strings"
 
 	"github.com/inclunet/accessibility/pkg/accessibility"
@@ -16,7 +14,6 @@ type AccessibilityReport struct {
 	HtmlReportPath string
 	JsonReportPath string
 	ReportFile     string
-	Rules          map[string]accessibility.AccessibilityRule
 	Summary        map[string]AccessibilitySummary
 	Title          string
 	Url            string
@@ -24,36 +21,37 @@ type AccessibilityReport struct {
 
 func (r *AccessibilityReport) AddCheck(accessibilityCheck accessibility.AccessibilityCheck) {
 	r.Checks = append(r.Checks, r.GetLineNumber(accessibilityCheck))
-	r.UpdateSummary(accessibilityCheck)
 }
 
-func (r *AccessibilityReport) LoadAccessibilityRules(filename string) error {
-	r.Rules = make(map[string]accessibility.AccessibilityRule)
-	accessibilityRulesFile, err := os.ReadFile(filename)
-
-	if err != nil {
-		return err
+func (r *AccessibilityReport) FindViolation(accessibilityViolations map[string]accessibility.AccessibilityViolation, accessibilityCheck accessibility.AccessibilityCheck) accessibility.AccessibilityCheck {
+	if accessibilityViolation, ok := accessibilityViolations[accessibilityCheck.Violation]; ok {
+		accessibilityCheck.A = accessibilityViolation.A
+		accessibilityCheck.Description = accessibilityViolation.Description
+		accessibilityCheck.Solution = accessibilityViolation.Solution
+		accessibilityCheck.Error = accessibilityViolation.Error
+		accessibilityCheck.Warning = accessibilityViolation.Warning
 	}
 
-	err = json.Unmarshal(accessibilityRulesFile, &r.Rules)
+	return accessibilityCheck
+}
 
-	if err != nil {
-		return err
+func (r *AccessibilityReport) FindViolations(accessibilityViolations map[string]accessibility.AccessibilityViolation) {
+	for i, accessibilityCheck := range r.Checks {
+		r.Checks[i] = r.FindViolation(accessibilityViolations, accessibilityCheck)
 	}
-
-	return nil
 }
 
 func (r *AccessibilityReport) UpdateSummary(accessibilityCheck accessibility.AccessibilityCheck) {
-	total, _ := r.Summary["total"]
+	total := r.Summary["total"]
 	total.Update(accessibilityCheck)
 	r.Summary["total"] = total
-	Summary, _ := r.Summary[accessibilityCheck.Element]
+	Summary := r.Summary[accessibilityCheck.Element]
 	Summary.Update(accessibilityCheck)
 	r.Summary[accessibilityCheck.Element] = Summary
 }
 
 func (r *AccessibilityReport) GenerateSummary() {
+	r.Summary = make(map[string]AccessibilitySummary)
 	for _, accessibilityCheck := range r.Checks {
 		r.UpdateSummary(accessibilityCheck)
 	}
@@ -70,15 +68,10 @@ func (r *AccessibilityReport) GetLineNumber(accessibilityCheck accessibility.Acc
 	return accessibilityCheck
 }
 
-func (r *AccessibilityReport) NewSummary() {
-	r.Summary = make(map[string]AccessibilitySummary)
-}
-
 func NewAccessibilityReport(url string, reportFile string, lang string, reportPath string, title string) AccessibilityReport {
 	return AccessibilityReport{
 		Url:        url,
 		Title:      title,
 		ReportFile: reportFile,
-		Summary:    make(map[string]AccessibilitySummary),
 	}
 }
