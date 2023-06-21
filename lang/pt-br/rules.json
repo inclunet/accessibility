@@ -55,12 +55,26 @@
         "description": "A hierarquia dos níveis de título está incorreta.",
         "solution": "Verifique a ordem sequencial da presença de hierarquia nos níveis dos cabeçalhos. Por exemplo: a presença de um cabeçalho de nível <h3> depende da existência de um cabeçalho de nível <h2> antes dele."
     },
+    "emag-1.3.3": {
+        "a": 1,
+        "error": true,
+        "warning": false,
+        "description": "Não foi usado o cabeçalho de nível <h1>, mas foram usados cabeçalhos de nível hierárquico menor na página",
+        "solution": "Você não deve usar cabeçalhos entre <h2> e <h6> se não houver um cabeçalho de nível <h1> antes deles, reordene os cabeçalhos da página de modo que exista um único cabeçalho de nível <h1> na página e que este represente a raíz das informações prezentes na página."
+    },
     "emag-1.3.4": {
         "a": 1,
         "error": false,
         "warning": true,
         "description": "Nesta página foi utilizado somente o título de nível H1",
         "solution": "Verifique a presença de apenas um nível de cabeçalho <h1> sem categorizar outros assuntos presentes na página em níveis de cabeçalho."
+    },
+    "emag-1.3.5": {
+        "a": 1,
+        "error": false,
+        "warning": true,
+        "description": "O primeiro       cabeçalho desta página não é um título de nível   <H1>, mas usa os títulos de níveis entre <h2> e <h6>",
+        "solution": "Verifique a presença de cabeçalhos de nível entre <h2> e <h6> sem        pelomenos um título de nível <h1> identificando o conteúdo mais importante da página."
     },
     "emag-1.3.6": {
         "a": 1,

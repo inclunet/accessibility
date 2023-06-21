@@ -22,6 +22,14 @@ func AfterCheck(accessibilityChecks []AccessibilityCheck) []AccessibilityCheck {
 	newChecks := []AccessibilityCheck{}
 
 	if HeaderUnavailable(accessibilityChecks) {
+		newChecks = append(newChecks, NewAccessibilityCheck("h1", "", "emag-1.3.1"))
+	}
+
+	if HeaderInvalidOrdenation(accessibilityChecks) {
+		newChecks = append(newChecks, NewAccessibilityCheck("h2", "", "emag-1.3.3"))
+	}
+
+	if HeaderMainUnavailable(accessibilityChecks) {
 		newChecks = append(newChecks, NewAccessibilityCheck("h1", "", "emag-1.3.4"))
 	}
 

@@ -9,27 +9,6 @@ type Headers struct {
 	Element
 }
 
-func (h *Headers) isIncorrectLevel(headerLevel int, currentLevel int) bool {
-	return currentLevel > headerLevel+1
-}
-
-func (h *Headers) CheckHierarchy(accessibilityCheck AccessibilityCheck) bool {
-	accessibilityChecks := append(h.AccessibilityChecks, accessibilityCheck)
-	headerLevel := 0
-
-	for _, accessibilityCheck := range accessibilityChecks {
-		if currentLevel, ok := HeaderLevel(accessibilityCheck); ok {
-			if h.isIncorrectLevel(headerLevel, currentLevel) {
-				return true
-			}
-
-			headerLevel = currentLevel
-		}
-	}
-
-	return false
-}
-
 func (h *Headers) Check() AccessibilityCheck {
 	accessibilityCheck := h.NewAccessibilityCheck("pass")
 
@@ -37,11 +16,15 @@ func (h *Headers) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
+	if HeaderWithoutMain(h.AccessibilityChecks, accessibilityCheck) {
+		return accessibilityCheck.SetViolation("emag-1.3.5")
+	}
+
 	if HeaderOverflow(h.AccessibilityChecks, accessibilityCheck) {
 		return accessibilityCheck.SetViolation("emag-1.3.6")
 	}
 
-	if h.CheckHierarchy(accessibilityCheck) {
+	if HeaderInvalidHierarchy(h.AccessibilityChecks, accessibilityCheck) {
 		return accessibilityCheck.SetViolation("emag-1.3.2")
 	}
 
@@ -74,11 +57,36 @@ func HeaderCheck(accessibilityCheck AccessibilityCheck) bool {
 func HeaderCount(accessibilityChecks []AccessibilityCheck) int {
 	headerCount := 0
 	for _, accessibilityCheck := range accessibilityChecks {
-		if headerLevel, ok := HeaderLevel(accessibilityCheck); ok && headerLevel == 1 {
+		if headerLevel, ok := HeaderLevel(accessibilityCheck); ok && headerLevel >= 1 && headerLevel <= 6 {
 			headerCount++
 		}
 	}
 	return headerCount
+}
+
+func HeaderIncorrectLevel(headerLevel int, currentLevel int) bool {
+	return currentLevel > headerLevel+1
+}
+
+func HeaderInvalidHierarchy(accessibilityChecks []AccessibilityCheck, accessibilityCheck AccessibilityCheck) bool {
+	accessibilityChecks = append(accessibilityChecks, accessibilityCheck)
+	headerLevel := 0
+
+	for _, accessibilityCheck := range accessibilityChecks {
+		if currentLevel, ok := HeaderLevel(accessibilityCheck); ok {
+			if HeaderIncorrectLevel(headerLevel, currentLevel) {
+				return true
+			}
+
+			headerLevel = currentLevel
+		}
+	}
+
+	return false
+}
+
+func HeaderInvalidOrdenation(accessibilityChecks []AccessibilityCheck) bool {
+	return HeaderMainCount(accessibilityChecks) == 0 && HeaderCount(accessibilityChecks) > 0
 }
 
 func HeaderLevel(accessibilityCheck AccessibilityCheck) (int, bool) {
@@ -89,10 +97,40 @@ func HeaderLevel(accessibilityCheck AccessibilityCheck) (int, bool) {
 	return 0, false
 }
 
+func HeaderMainCount(accessibilityChecks []AccessibilityCheck) int {
+	headerCount := 0
+	for _, accessibilityCheck := range accessibilityChecks {
+		if headerLevel, ok := HeaderLevel(accessibilityCheck); ok && headerLevel == 1 {
+			headerCount++
+		}
+	}
+	return headerCount
+}
+
+func HeaderMainUnavailable(accessibilityChecks []AccessibilityCheck) bool {
+	return HeaderMainCount(accessibilityChecks) == 0
+}
+
 func HeaderOverflow(accessibilityChecks []AccessibilityCheck, accessibilityCheck AccessibilityCheck) bool {
-	return HeaderCount(append(accessibilityChecks, accessibilityCheck)) > 1
+	return HeaderMainCount(append(accessibilityChecks, accessibilityCheck)) > 1
 }
 
 func HeaderUnavailable(accessibilityChecks []AccessibilityCheck) bool {
 	return HeaderCount(accessibilityChecks) == 0
+}
+
+func HeaderWithoutMain(accessibilityChecks []AccessibilityCheck, accessibilityCheck AccessibilityCheck) bool {
+	headerCount := 0
+	accessibilityChecks = append(accessibilityChecks, accessibilityCheck)
+	for _, check := range accessibilityChecks {
+		if headerLevel, ok := HeaderLevel(check); ok {
+			if headerLevel >= 2 && headerLevel <= 6 && headerCount == 0 {
+				return true
+			}
+
+			headerCount++
+		}
+	}
+
+	return false
 }
