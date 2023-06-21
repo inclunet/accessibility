@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"log"
 
 	"github.com/inclunet/accessibility/pkg/checker"
+	"github.com/inclunet/accessibility/pkg/report"
 )
 
 func main() {
@@ -19,18 +19,17 @@ func main() {
 	flag.StringVar(&lang, "lang", "pt-BR", "Content language of page")
 	flag.StringVar(&checkList, "check-list", "", "List of pages to check")
 	flag.Parse()
-	evaluator, err := checker.NewChecker(checker.AccessibilityChecker{
+
+	accessibilityReport := report.AccessibilityReport{
+		Url:        url,
+		ReportFile: reportFile,
+	}
+
+	evaluator := checker.AccessibilityChecker{
 		FileName:   checkList,
 		Lang:       lang,
 		ReportPath: reportPath,
-	})
-
-	if err != nil {
-		log.Println(err)
 	}
 
-	evaluator.GetDomainName(url)
-	evaluator.AddCheckListItem(url, reportFile)
-	evaluator.CheckAllList()
-	evaluator.SaveAllReports()
+	checker.NewChecker(evaluator, accessibilityReport)
 }

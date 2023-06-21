@@ -66,8 +66,8 @@
         "a": 1,
         "error": true,
         "warning": false,
-        "description": "Mais de 1 cabeçalho de nível h1 estão presentes nesta página",
-        "solution": "Verifique a presença de vários cabeçalhos de nível <h1> sendo utilizados nesta página."
+        "description": "Presença de mais de 1 cabeçalho de nível <h1>",
+        "solution": "Verificar a presença de níveis de cabeçalho <h1> sendo utilizados de forma repetida."
     },
     "emag-3.5.3": {
         "a": 1,

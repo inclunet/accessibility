@@ -1,15 +1,12 @@
 package accessibility
 
 import (
-	"html/template"
-
 	"github.com/PuerkitoBio/goquery"
 )
 
 type Element struct {
 	Selection           *goquery.Selection
 	AccessibilityChecks []AccessibilityCheck
-	AccessibilityRules  map[string]AccessibilityRule
 }
 
 func (e *Element) AlternativeText() (string, bool) {
@@ -53,12 +50,12 @@ func (e *Element) AccessibleText() (string, bool) {
 	return "", false
 }
 
-func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck, accessibilityRules map[string]AccessibilityRule) (AccessibilityCheck, error) {
-	accessibilityCheck, err := NewElementCheck(s, accessibilityChecks, accessibilityRules)
+func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
+	accessibilityCheck, err := NewElementCheck(s, accessibilityChecks)
 
 	if err != nil {
 		s.Each(func(i int, s *goquery.Selection) {
-			accessibilityCheck, err = e.DeepCheck(s.Children(), accessibilityChecks, accessibilityRules)
+			accessibilityCheck, err = e.DeepCheck(s.Children(), accessibilityChecks)
 		})
 	}
 	return accessibilityCheck, err
@@ -72,28 +69,9 @@ func (e *Element) CheckTooShortText(accessibilityText string) bool {
 	return len(accessibilityText) < 3
 }
 
-func (e *Element) FindViolation(accessibilityCheck AccessibilityCheck, violation string) AccessibilityCheck {
-	if accessibilityViolation, ok := e.AccessibilityRules[violation]; ok {
-		accessibilityCheck.A = accessibilityViolation.A
-		accessibilityCheck.Description = accessibilityViolation.Description
-		accessibilityCheck.Solution = accessibilityViolation.Solution
-		accessibilityCheck.Error = accessibilityViolation.Error
-		accessibilityCheck.Warning = accessibilityViolation.Warning
-	}
-
-	return accessibilityCheck
-}
-
 func (e *Element) NewAccessibilityCheck(violation string) AccessibilityCheck {
 	htmlElement, _ := goquery.OuterHtml(e.Selection)
-	accessibilityCheck := AccessibilityCheck{
-		Element: goquery.NodeName(e.Selection),
-		Error:   false,
-		Warning: false,
-		Html:    template.HTML(htmlElement),
-		Text:    htmlElement,
-	}
-	return e.FindViolation(accessibilityCheck, violation)
+	return NewAccessibilityCheck(goquery.NodeName(e.Selection), htmlElement, violation)
 }
 
 func (e *Element) Role() (string, bool) {
@@ -114,15 +92,11 @@ func (e *Element) SetAccessibilityChecks(accessibilityChecks []AccessibilityChec
 	e.AccessibilityChecks = accessibilityChecks
 }
 
-func (e *Element) SetAccessibilityRules(accessibilityRules map[string]AccessibilityRule) {
-	e.AccessibilityRules = accessibilityRules
-}
-
 func (e *Element) SetSelection(s *goquery.Selection) {
 	e.Selection = s
 }
 
-func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck, accessibilityRules map[string]AccessibilityRule) (AccessibilityCheck, error) {
+func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
 	accessibilityInterface, err := GetElementInterface(goquery.NodeName(s))
 
 	if err != nil {
@@ -131,7 +105,6 @@ func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCh
 
 	accessibilityInterface.SetSelection(s)
 	accessibilityInterface.SetAccessibilityChecks(accessibilityChecks)
-	accessibilityInterface.SetAccessibilityRules(accessibilityRules)
 
 	return accessibilityInterface.Check(), nil
 }
