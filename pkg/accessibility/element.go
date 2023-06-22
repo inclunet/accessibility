@@ -61,12 +61,9 @@ func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []Accessib
 	return accessibilityCheck, err
 }
 
-func (e *Element) CheckTooLongText(accessibilityText string, maxLength int) bool {
-	return len(accessibilityText) > maxLength
-}
+func (e *Element) CheckAccessibleText(accessibilityCheck AccessibilityCheck) AccessibilityCheck {
 
-func (e *Element) CheckTooShortText(accessibilityText string) bool {
-	return len(accessibilityText) < 3
+	return accessibilityCheck
 }
 
 func (e *Element) NewAccessibilityCheck(violation string) AccessibilityCheck {

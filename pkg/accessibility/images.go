@@ -17,13 +17,5 @@ func (i *Images) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-3.6.2")
 	}
 
-	if i.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if i.CheckTooLongText(accessibleText, 240) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(240, "too-long-text").Check(accessibleText)
 }

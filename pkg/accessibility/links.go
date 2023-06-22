@@ -21,13 +21,5 @@ func (l *Links) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-3.5.3")
 	}
 
-	if l.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if l.CheckTooLongText(accessibleText, 200) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(200, "too-long-text").Check(accessibleText)
 }

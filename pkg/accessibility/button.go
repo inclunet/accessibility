@@ -21,13 +21,5 @@ func (b *Buttons) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-6.1.1")
 	}
 
-	if b.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if b.CheckTooLongText(accessibleText, 120) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(120, "too-long-text").Check(accessibleText)
 }

@@ -70,13 +70,5 @@ func (i *Inputs) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-6.2.1")
 	}
 
-	if i.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if i.CheckTooLongText(accessibleText, 120) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(120, "too-long-text").Check(accessibleText)
 }

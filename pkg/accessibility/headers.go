@@ -34,15 +34,7 @@ func (h *Headers) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-1.2.3")
 	}
 
-	if h.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if h.CheckTooLongText(accessibleText, 80) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(80, "too-long-text").Check(accessibleText)
 }
 
 func HeaderCheck(accessibilityCheck AccessibilityCheck) bool {
