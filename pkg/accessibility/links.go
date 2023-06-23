@@ -11,7 +11,7 @@ func (l *Links) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
-	accessibleText, ok := l.AccessibleText()
+	accessibleText, ok := l.GetAccessibleText()
 
 	if !ok {
 		if accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks); err == nil {

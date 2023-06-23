@@ -11,7 +11,7 @@ func (b *Buttons) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
-	accessibleText, ok := b.AccessibleText()
+	accessibleText, ok := b.GetAccessibleText()
 
 	if !ok {
 		if accessibilityCheck, err := b.DeepCheck(b.Selection.Children(), b.AccessibilityChecks); err == nil {

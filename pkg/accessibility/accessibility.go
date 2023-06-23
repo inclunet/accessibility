@@ -7,15 +7,21 @@ import (
 )
 
 type Accessibility interface {
-	AlternativeText() (string, bool)
+	GetAlternativeText() (string, bool)
+	GetAriaLabel() (string, bool)
+	GetTitle() (string, bool)
 	AriaHidden() bool
-	AriaLabel() (string, bool)
 	Check() AccessibilityCheck
 	DeepCheck(*goquery.Selection, []AccessibilityCheck) (AccessibilityCheck, error)
 	NewAccessibilityCheck(string) AccessibilityCheck
 	Role() (string, bool)
-	SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck)
-	SetSelection(s *goquery.Selection)
+	SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck) Accessibility
+	SetSelection(s *goquery.Selection) Accessibility
+	SetUseAlternativeText(bool) Accessibility
+	SetUseAriaHidden(bool) Accessibility
+	SetUseAriaLabel(bool) Accessibility
+	SetUseElementText(bool) Accessibility
+	SetUseTitle(bool) Accessibility
 }
 
 func AfterCheck(accessibilityChecks []AccessibilityCheck) []AccessibilityCheck {

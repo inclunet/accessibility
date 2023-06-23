@@ -11,7 +11,7 @@ func (i *Images) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("aria-hidden")
 	}
 
-	accessibleText, ok := i.AccessibleText()
+	accessibleText, ok := i.GetAccessibleText()
 
 	if !ok {
 		return accessibilityCheck.SetViolation("emag-3.6.2")

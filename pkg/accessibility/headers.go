@@ -28,7 +28,7 @@ func (h *Headers) Check() AccessibilityCheck {
 		return accessibilityCheck.SetViolation("emag-1.3.2")
 	}
 
-	accessibleText, ok := h.AccessibleText()
+	accessibleText, ok := h.GetAccessibleText()
 
 	if !ok {
 		return accessibilityCheck.SetViolation("emag-1.2.3")

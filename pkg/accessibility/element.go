@@ -5,12 +5,55 @@ import (
 )
 
 type Element struct {
-	Selection           *goquery.Selection
 	AccessibilityChecks []AccessibilityCheck
+	Selection           *goquery.Selection
+	useAlternativeText  bool
+	useAriaHidden       bool
+	useAriaLabel        bool
+	useElementText      bool
+	useTitle            bool
 }
 
-func (e *Element) AlternativeText() (string, bool) {
-	if accessibleText, ok := e.Selection.Attr("alt"); ok && accessibleText != "" {
+func (e *Element) Check() AccessibilityCheck {
+	return AccessibilityCheck{}
+}
+
+func (e *Element) GetAccessibleText() (string, bool) {
+	if accessibleText, ok := e.GetAriaLabel(); ok {
+		return accessibleText, ok
+	}
+
+	if accessibleText, ok := e.GetAlternativeText(); ok {
+		return accessibleText, ok
+	}
+
+	if accessibleText := e.Selection.Text(); accessibleText != "" && e.useElementText {
+		return accessibleText, true
+	}
+
+	if accessibleText, ok := e.GetTitle(); ok {
+		return accessibleText, ok
+	}
+
+	return "", false
+}
+
+func (e *Element) GetAlternativeText() (string, bool) {
+	if accessibleText, ok := e.Selection.Attr("alt"); ok && accessibleText != "" && e.useAlternativeText {
+		return accessibleText, true
+	}
+	return "", false
+}
+
+func (e *Element) GetAriaLabel() (string, bool) {
+	if value, ok := e.Selection.Attr("aria-label"); ok && value != "" && e.useAriaLabel {
+		return value, true
+	}
+	return "", false
+}
+
+func (e *Element) GetTitle() (string, bool) {
+	if accessibleText, ok := e.Selection.Attr("title"); ok && accessibleText != "" && e.useTitle {
 		return accessibleText, true
 	}
 	return "", false
@@ -21,33 +64,6 @@ func (e *Element) AriaHidden() bool {
 		return true
 	}
 	return false
-}
-
-func (e *Element) AriaLabel() (string, bool) {
-	if value, ok := e.Selection.Attr("aria-label"); ok && value != "" {
-		return value, true
-	}
-	return "", false
-}
-
-func (e *Element) AccessibleText() (string, bool) {
-	if accessibleText, ok := e.AriaLabel(); ok {
-		return accessibleText, ok
-	}
-
-	if accessibleText, ok := e.AlternativeText(); ok {
-		return accessibleText, ok
-	}
-
-	if accessibleText := e.Selection.Text(); accessibleText != "" {
-		return accessibleText, true
-	}
-
-	if accessibleText, ok := e.GetTitle(); ok {
-		return accessibleText, ok
-	}
-
-	return "", false
 }
 
 func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
@@ -78,19 +94,39 @@ func (e *Element) Role() (string, bool) {
 	return "", false
 }
 
-func (e *Element) GetTitle() (string, bool) {
-	if accessibleText, ok := e.Selection.Attr("title"); ok && accessibleText != "" {
-		return accessibleText, true
-	}
-	return "", false
-}
-
-func (e *Element) SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck) {
+func (e *Element) SetAccessibilityChecks(accessibilityChecks []AccessibilityCheck) Accessibility {
 	e.AccessibilityChecks = accessibilityChecks
+	return e
 }
 
-func (e *Element) SetSelection(s *goquery.Selection) {
+func (e *Element) SetSelection(s *goquery.Selection) Accessibility {
 	e.Selection = s
+	return e
+}
+
+func (e *Element) SetUseAlternativeText(useAlternativeText bool) Accessibility {
+	e.useAlternativeText = useAlternativeText
+	return e
+}
+
+func (e *Element) SetUseAriaHidden(useAriaHidden bool) Accessibility {
+	e.useAriaHidden = useAriaHidden
+	return e
+}
+
+func (e *Element) SetUseAriaLabel(useAriaLabel bool) Accessibility {
+	e.useAriaLabel = useAriaLabel
+	return e
+}
+
+func (e *Element) SetUseElementText(useElementText bool) Accessibility {
+	e.useElementText = useElementText
+	return e
+}
+
+func (e *Element) SetUseTitle(useTitle bool) Accessibility {
+	e.useTitle = useTitle
+	return e
 }
 
 func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
@@ -100,8 +136,7 @@ func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCh
 		return AccessibilityCheck{}, err
 	}
 
-	accessibilityInterface.SetSelection(s)
-	accessibilityInterface.SetAccessibilityChecks(accessibilityChecks)
+	accessibilityInterface.SetSelection(s).SetAccessibilityChecks(accessibilityChecks).SetUseAlternativeText(true).SetUseAriaLabel(true).SetUseElementText(true).SetUseTitle(true).SetUseAriaHidden(true)
 
 	return accessibilityInterface.Check(), nil
 }

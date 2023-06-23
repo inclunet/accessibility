@@ -9,7 +9,7 @@ func (i *Inputs) AccessibleText() (string, bool) {
 	case "submit", "reset", "button":
 		return i.Selection.Attr("value")
 	default:
-		return i.Element.AccessibleText()
+		return i.Element.GetAccessibleText()
 	}
 }
 
