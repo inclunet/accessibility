@@ -4,26 +4,12 @@ type Images struct {
 	Element
 }
 
-func (i *Images) Check() AccessibilityCheck {
-	accessibilityCheck := i.NewAccessibilityCheck("pass")
-
-	if i.AriaHidden() {
-		return accessibilityCheck.SetViolation("aria-hidden")
-	}
-
-	accessibleText, ok := i.AccessibleText()
+func (i *Images) Check() ([]AccessibilityCheck, bool) {
+	accessibleText, ok := i.GetAccessibleText()
 
 	if !ok {
-		return accessibilityCheck.SetViolation("emag-3.6.2")
+		return i.AddViolation("emag-3.6.2", false)
 	}
 
-	if i.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if i.CheckTooLongText(accessibleText, 240) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(i.AccessibilityChecks, i.AccessibilityCheck).SetMaxLength(240, "too-long-text").Check(accessibleText)
 }

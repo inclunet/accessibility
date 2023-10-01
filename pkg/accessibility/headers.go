@@ -9,40 +9,26 @@ type Headers struct {
 	Element
 }
 
-func (h *Headers) Check() AccessibilityCheck {
-	accessibilityCheck := h.NewAccessibilityCheck("pass")
-
-	if h.AriaHidden() {
-		return accessibilityCheck.SetViolation("aria-hidden")
+func (h *Headers) Check() ([]AccessibilityCheck, bool) {
+	if HeaderWithoutMain(h.AccessibilityChecks, h.AccessibilityCheck) {
+		return h.AddViolation("emag-1.3.5", false)
 	}
 
-	if HeaderWithoutMain(h.AccessibilityChecks, accessibilityCheck) {
-		return accessibilityCheck.SetViolation("emag-1.3.5")
+	if HeaderOverflow(h.AccessibilityChecks, h.AccessibilityCheck) {
+		return h.AddViolation("emag-1.3.6", false)
 	}
 
-	if HeaderOverflow(h.AccessibilityChecks, accessibilityCheck) {
-		return accessibilityCheck.SetViolation("emag-1.3.6")
+	if HeaderInvalidHierarchy(h.AccessibilityChecks, h.AccessibilityCheck) {
+		return h.AddViolation("emag-1.3.2", false)
 	}
 
-	if HeaderInvalidHierarchy(h.AccessibilityChecks, accessibilityCheck) {
-		return accessibilityCheck.SetViolation("emag-1.3.2")
-	}
-
-	accessibleText, ok := h.AccessibleText()
+	accessibleText, ok := h.GetAccessibleText()
 
 	if !ok {
-		return accessibilityCheck.SetViolation("emag-1.2.3")
+		return h.AddViolation("emag-1.2.3", false)
 	}
 
-	if h.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if h.CheckTooLongText(accessibleText, 80) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(h.AccessibilityChecks, h.AccessibilityCheck).SetMaxLength(80, "too-long-text").Check(accessibleText)
 }
 
 func HeaderCheck(accessibilityCheck AccessibilityCheck) bool {

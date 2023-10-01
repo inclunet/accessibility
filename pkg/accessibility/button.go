@@ -4,30 +4,17 @@ type Buttons struct {
 	Element
 }
 
-func (b *Buttons) Check() AccessibilityCheck {
-	accessibilityCheck := b.NewAccessibilityCheck("pass")
-
-	if b.AriaHidden() {
-		return accessibilityCheck.SetViolation("aria-hidden")
-	}
-
-	accessibleText, ok := b.AccessibleText()
+func (b *Buttons) Check() ([]AccessibilityCheck, bool) {
+	accessibleText, ok := b.GetAccessibleText()
 
 	if !ok {
-		if accessibilityCheck, err := b.DeepCheck(b.Selection.Children(), b.AccessibilityChecks); err == nil {
-			return accessibilityCheck
+		accessibilityChecks := Check(b.Selection.Children(), []AccessibilityCheck{})
+		for _, accessibilityCheck := range accessibilityChecks {
+			return b.AddViolation(accessibilityCheck.Violation, false)
 		}
 
-		return accessibilityCheck.SetViolation("emag-6.1.1")
+		return b.AddViolation("emag-6.1.1", false)
 	}
 
-	if b.CheckTooShortText(accessibleText) {
-		return accessibilityCheck.SetViolation("too-short-text")
-	}
-
-	if b.CheckTooLongText(accessibleText, 120) {
-		return accessibilityCheck.SetViolation("too-long-text")
-	}
-
-	return accessibilityCheck
+	return NewAccessibleTextCheck(b.AccessibilityChecks, b.AccessibilityCheck).SetMaxLength(120, "too-long-text").Check(accessibleText)
 }
