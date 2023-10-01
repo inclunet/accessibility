@@ -5,6 +5,7 @@ import (
 )
 
 type Element struct {
+	AccessibilityCheck  AccessibilityCheck
 	AccessibilityChecks []AccessibilityCheck
 	Selection           *goquery.Selection
 	useAlternativeText  bool
@@ -14,8 +15,21 @@ type Element struct {
 	useTitle            bool
 }
 
-func (e *Element) Check() AccessibilityCheck {
-	return AccessibilityCheck{}
+func (e *Element) AddViolation(violation string, pass bool) ([]AccessibilityCheck, bool) {
+	e.AccessibilityChecks = append(e.AccessibilityChecks, e.AccessibilityCheck.SetViolation(violation))
+	return e.AccessibilityChecks, pass
+}
+
+func (e *Element) AfterCheck() ([]AccessibilityCheck, bool) {
+	return e.AccessibilityChecks, false
+}
+
+func (e *Element) BeforeCheck() ([]AccessibilityCheck, bool) {
+	return e.AccessibilityChecks, false
+}
+
+func (e *Element) Check() ([]AccessibilityCheck, bool) {
+	return e.AccessibilityChecks, false
 }
 
 func (e *Element) GetAccessibleText() (string, bool) {
@@ -59,22 +73,11 @@ func (e *Element) GetTitle() (string, bool) {
 	return "", false
 }
 
-func (e *Element) AriaHidden() bool {
-	if value, ok := e.Selection.Attr("aria-hidden"); ok && value == "true" {
-		return true
+func (e *Element) IsAriaHidden() ([]AccessibilityCheck, bool) {
+	if value, ok := e.Selection.Attr("aria-hidden"); ok && value == "true" && e.useAriaHidden {
+		return e.AddViolation("aria-hidden", true)
 	}
-	return false
-}
-
-func (e *Element) DeepCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
-	accessibilityCheck, err := NewElementCheck(s, accessibilityChecks)
-
-	if err != nil {
-		s.Each(func(i int, s *goquery.Selection) {
-			accessibilityCheck, err = e.DeepCheck(s.Children(), accessibilityChecks)
-		})
-	}
-	return accessibilityCheck, err
+	return e.AddViolation("pass", false)
 }
 
 func (e *Element) CheckAccessibleText(accessibilityCheck AccessibilityCheck) AccessibilityCheck {
@@ -82,9 +85,10 @@ func (e *Element) CheckAccessibleText(accessibilityCheck AccessibilityCheck) Acc
 	return accessibilityCheck
 }
 
-func (e *Element) NewAccessibilityCheck(violation string) AccessibilityCheck {
-	htmlElement, _ := goquery.OuterHtml(e.Selection)
-	return NewAccessibilityCheck(goquery.NodeName(e.Selection), htmlElement, violation)
+func (e *Element) NewAccessibilityCheck() Accessibility {
+	html, _ := goquery.OuterHtml(e.Selection)
+	e.AccessibilityCheck.SetElement(goquery.NodeName(e.Selection)).SetHtml(html)
+	return e
 }
 
 func (e *Element) Role() (string, bool) {
@@ -129,14 +133,12 @@ func (e *Element) SetUseTitle(useTitle bool) Accessibility {
 	return e
 }
 
-func NewElementCheck(s *goquery.Selection, accessibilityChecks []AccessibilityCheck) (AccessibilityCheck, error) {
+func NewElementCheck(s *goquery.Selection) (Accessibility, error) {
 	accessibilityInterface, err := GetElementInterface(goquery.NodeName(s))
 
 	if err != nil {
-		return AccessibilityCheck{}, err
+		return nil, err
 	}
 
-	accessibilityInterface.SetSelection(s).SetAccessibilityChecks(accessibilityChecks).SetUseAlternativeText(true).SetUseAriaLabel(true).SetUseElementText(true).SetUseTitle(true).SetUseAriaHidden(true)
-
-	return accessibilityInterface.Check(), nil
+	return accessibilityInterface.SetSelection(s).NewAccessibilityCheck(), nil
 }

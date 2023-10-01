@@ -44,21 +44,6 @@ func (c *AccessibilityChecker) AfterCheck(accessibilityReport report.Accessibili
 	return accessibilityReport
 }
 
-func (c *AccessibilityChecker) Check(s *goquery.Selection, accessibilityReport report.AccessibilityReport) report.AccessibilityReport {
-	s.Each(func(i int, s *goquery.Selection) {
-
-		accessibilityCheck, err := accessibility.NewElementCheck(s, accessibilityReport.Checks)
-
-		if err == nil {
-			accessibilityReport.AddCheck(accessibilityCheck)
-		}
-
-		accessibilityReport = c.Check(s.Children(), accessibilityReport)
-	})
-
-	return accessibilityReport
-}
-
 func (c *AccessibilityChecker) FindAllViolations() {
 	log.Println("Creating a detailed report...")
 	accessibilityViolations, err := accessibility.LoadAccessibilityViolations("lang/" + c.Lang + "/rules.json")
@@ -102,8 +87,8 @@ func (c *AccessibilityChecker) CheckPage(accessibilityReport report.Accessibilit
 	accessibilityReport.Html = html
 	accessibilityReport.Title = document.Find("head title").Text()
 	log.Printf("Evaluating page with title: %s", accessibilityReport.Title)
-	accessibilityReport = c.Check(document.Find("html"), accessibilityReport)
-	accessibilityReport = c.AfterCheck(accessibilityReport)
+	accessibilityReport.Checks = accessibility.Check(document.Find("html"), accessibilityReport.Checks)
+	//accessibilityReport = c.AfterCheck(accessibilityReport)
 	log.Println("evaluation process finished.")
 	return accessibilityReport, nil
 }

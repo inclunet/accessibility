@@ -49,26 +49,20 @@ func (i *Inputs) FindLabel() bool {
 	return false
 }
 
-func (i *Inputs) Check() AccessibilityCheck {
-	accessibilityCheck := i.NewAccessibilityCheck("pass")
-
-	if i.AriaHidden() {
-		return accessibilityCheck.SetViolation("aria-hidden")
-	}
-
+func (i *Inputs) Check() ([]AccessibilityCheck, bool) {
 	if i.isHiddenField() {
-		return accessibilityCheck.SetViolation("aria-hidden")
+		return i.AddViolation("aria-hidden", false)
 	}
 
 	if i.FindLabel() {
-		return accessibilityCheck.SetViolation("emag-6.2.1")
+		return i.AddViolation("emag-6.2.1", false)
 	}
 
 	accessibleText, ok := i.AccessibleText()
 
 	if !ok {
-		return accessibilityCheck.SetViolation("emag-6.2.1")
+		return i.AddViolation("emag-6.2.1", false)
 	}
 
-	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(120, "too-long-text").Check(accessibleText)
+	return NewAccessibleTextCheck(i.AccessibilityChecks, i.AccessibilityCheck).SetMaxLength(120, "too-long-text").Check(accessibleText)
 }

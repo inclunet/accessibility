@@ -15,9 +15,25 @@ type AccessibilityCheck struct {
 	Violation   string
 }
 
-func (c *AccessibilityCheck) SetViolation(violation string) AccessibilityCheck {
-	c.Violation = violation
-	return *c
+func (a *AccessibilityCheck) SetElement(element string) *AccessibilityCheck {
+	a.Element = element
+	return a
+}
+
+func (a *AccessibilityCheck) SetHtml(html string) *AccessibilityCheck {
+	a.Html = template.HTML(html)
+	a.SetText(html)
+	return a
+}
+
+func (a *AccessibilityCheck) SetText(text string) *AccessibilityCheck {
+	a.Text = text
+	return a
+}
+
+func (a *AccessibilityCheck) SetViolation(violation string) AccessibilityCheck {
+	a.Violation = violation
+	return *a
 }
 
 func NewAccessibilityCheck(element string, htmlElement string, violation string) AccessibilityCheck {

@@ -1,19 +1,26 @@
 package accessibility
 
+import "fmt"
+
 type AmpImg struct {
 	Images
 }
 
-func (a *AmpImg) Check() AccessibilityCheck {
-	accessibilityCheck := a.Images.Check()
-
-	if accessibilityCheck.Error {
-		if accessibilityCheck, err := a.DeepCheck(a.Selection.Children(), a.AccessibilityChecks); err == nil {
-			return accessibilityCheck
-		}
-
-		return accessibilityCheck.SetViolation("emag-3.6.2")
+func (a *AmpImg) Check() ([]AccessibilityCheck, bool) {
+	fmt.Println("a")
+	if accessibilityChecks, pass := a.Images.Check(); pass {
+		fmt.Println("*")
+		return accessibilityChecks, pass
 	}
 
-	return accessibilityCheck
+	accessibilityChecks := Check(a.Selection.Children(), []AccessibilityCheck{})
+	fmt.Println("*")
+	for _, accessibilityCheck := range accessibilityChecks {
+		fmt.Println("*")
+		if accessibilityCheck.Violation != "pass" {
+			return a.AddViolation(accessibilityCheck.Violation, false)
+		}
+	}
+
+	return a.AddViolation("pass", true)
 }

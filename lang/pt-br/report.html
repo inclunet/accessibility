@@ -75,14 +75,12 @@
                         data-bs-parent="#details">
                         <div class="card-body">
                             {{range $i, $check := $summary.Checks}}
-                            {{if $check.Error}}
                             <h4>{{$check.Description}}</h4>
                             <blockquote>{{$check.Html}}</blockquote>
                             <h5>Como resolver</h5>
                             <p>{{$check.Solution}}</p>
                             <blockquote>{{$check.Text}}</blockquote>
                         </div>
-                        {{end}}
                         {{end}}
                     </div>
                 </div>

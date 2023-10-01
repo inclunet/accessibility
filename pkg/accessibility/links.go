@@ -4,22 +4,17 @@ type Links struct {
 	Element
 }
 
-func (l *Links) Check() AccessibilityCheck {
-	accessibilityCheck := l.NewAccessibilityCheck("pass")
-
-	if l.AriaHidden() {
-		return accessibilityCheck.SetViolation("aria-hidden")
-	}
-
+func (l *Links) Check() ([]AccessibilityCheck, bool) {
 	accessibleText, ok := l.GetAccessibleText()
 
 	if !ok {
-		if accessibilityCheck, err := l.DeepCheck(l.Selection.Children(), l.AccessibilityChecks); err == nil {
-			return accessibilityCheck
+		accessibilityChecks := Check(l.Selection.Children(), []AccessibilityCheck{})
+		for _, accessibilityCheck := range accessibilityChecks {
+			return l.AddViolation(accessibilityCheck.Violation, false)
 		}
 
-		return accessibilityCheck.SetViolation("emag-3.5.3")
+		return l.AddViolation("emag-3.5.3", false)
 	}
 
-	return NewAccessibleTextCheck(accessibilityCheck).SetMaxLength(200, "too-long-text").Check(accessibleText)
+	return NewAccessibleTextCheck(l.AccessibilityChecks, l.AccessibilityCheck).SetMaxLength(200, "too-long-text").Check(accessibleText)
 }
